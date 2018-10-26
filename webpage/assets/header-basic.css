@@ -1,0 +1,91 @@
+.header-basic {
+	background-color: #292c2f;
+	box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.15);
+	padding: 10px 0;
+	height: 50px;
+	box-sizing: border-box;
+	font-family: Helvetica;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	z-index: 500;
+}
+
+/* Logo */
+
+.header-basic h1 {
+	float: left;
+	padding: 8px 0;
+	font: normal 28px Cookie, Arial, Helvetica, sans-serif;
+	line-height: 20px;
+	margin: 0;
+}
+
+.header-basic h1 span {
+	color: #5383d3;
+}
+
+/* The header links */
+
+.header-basic a {
+	color: #ffffff;
+	text-decoration: none;
+}
+
+.header-basic nav{
+	font:16px Arial, Helvetica, sans-serif;
+	float: right;
+}
+
+.header-basic nav a{
+	display: inline-block;
+	padding: 0 5px;
+	text-decoration:none;
+	color: #ffffff;
+	font-size: 16px;
+	opacity: 0.9;
+}
+
+.header-basic nav a:hover{
+	opacity: 1;
+}
+
+.header-basic nav a.selected {
+	color: #608bd2;
+	pointer-events: none;
+	opacity: 1;
+}
+
+.header-basic img{
+	margin: 0px auto;
+}
+
+/* navigation bar */
+.header-basic ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.header-basic li {
+    display: inline;
+}
+
+.header-basic li a {
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.header-basic li a:hover {
+    background-color: #111;
+}
+
+/* For the headers to look good, be sure to reset the margin and padding of the body */
+
+body {
+	margin:0;
+	padding:0;
+}

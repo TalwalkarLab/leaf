@@ -1,0 +1,143 @@
+html {
+	background-color: white;
+}
+
+body {
+	font:14px/1.5 Helvetica;
+	padding:0;
+	margin:0;
+}
+
+.title {
+	text-align: center;
+    margin-top: 50px;
+    background-size: cover;
+    padding-left: 70px;
+    padding-right: 70px;
+}
+.title h1 {
+	font: normal 48px/1.5 sans-serif;
+	line-height: 0px;
+}
+.title h2 {
+	font: normal 24px/1.5 sans-serif;
+}
+.title img {
+	opacity: 0.8;
+	margin: 20px auto;
+}
+
+span.subtitle {
+    text-align: center;
+	font: normal 24px/1.5 sans-serif;
+	color: #00a571;
+}
+
+span.description {
+	text-align: center;
+	font: normal 18px/1.5 Helvetica;
+	width: 85%;
+	margin: 0 auto;
+    padding: 10px;
+}
+
+.title h3{
+	text-align: center;
+	color: #00a571;
+}
+.title h3 a{
+	color:inherit;
+	text-decoration: none;
+	display: inline-block;
+	border: 1px solid #00a571;
+	padding: 10px 15px;
+	border-radius: 3px;
+	font: bold 14px/1 'Open Sans', sans-serif;
+	text-transform: uppercase;
+}
+.title h3 a:hover{
+	background-color:#00a571;
+	transition:0.2s;
+	color:#fff;
+}
+
+.overview{
+	width: 700px;
+	margin:0 auto;
+	text-align: center;
+}
+
+.showHide { display:none; }
+@media screen and (min-width: 500px) {
+	.showHide  { display: inline; }
+}
+
+.menu{
+	max-width: 900px;
+	text-align: center;
+	margin: 0px auto;
+}
+
+.vertspace {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+.infobox {
+	display: -webkit-box;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+
+	-webkit-flex-flow: row wrap;
+	flex-flow: row wrap;
+	justify-content: space-around;
+
+	width: 85%;
+	margin-left: auto;
+	margin-right: auto;
+	background: white;
+}
+.infobox-1 {
+	padding: 5px 0;
+	background: white;
+	vertical-align: middle;
+}
+.infobox-2 {
+	padding: 5px 0;
+	background: white;
+}
+
+.collapsible {
+	background-color: #e2edeb;
+	font: normal 16px Helvetica;
+    color: #00a571;
+    cursor: pointer;
+    width: 100%;
+    border: none;
+	text-align: left;
+    outline: none;
+	font-size: 15px;
+	border-bottom: 3px solid #00a57135;
+}
+
+.collapsible font{
+	padding: 10px;
+}
+
+.collapsible img{
+	padding: 5px;
+}
+
+.active, .collapsible:hover {
+    background-color: #dce8e6;
+}
+
+.content {
+	background-color: #f1f1f1;
+	border-bottom: 1px solid #00a57135;
+	max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
