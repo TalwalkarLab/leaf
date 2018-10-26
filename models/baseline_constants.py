@@ -20,6 +20,7 @@ MAIN_PARAMS = { # (tot_num_rounds, eval_every_num_rounds, clients_per_round)
 MODEL_PARAMS = {
     'sent140.bag_dnn': (0.0003, 2), # lr, num_classes
     'sent140.stacked_lstm': (0.0003, 25, 2, 100), # lr, seq_len, num_classes, num_hidden
+    'sent140.bag_log_reg': (0.0003, 2), # lr, num_classes
     'femnist.cnn': (0.0003, 62), # lr, num_classes
     'shakespeare.stacked_lstm': (0.0003, 80, 53, 256) # lr, seq_len, num_classes, num_hidden
 }
