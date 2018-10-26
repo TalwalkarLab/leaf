@@ -17,7 +17,7 @@
 3. Shakespeare
 
   * **Overview:** Text Dataset of Shakespeare Dialogues
-  * **Details:** 1129 users
+  * **Details:** 2288 users
   * **Task:** Next-Character Prediction
 
 ## Notes
