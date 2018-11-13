@@ -33,7 +33,7 @@ class Server:
         self.selected_clients = clients_chosen
         return [(len(c.train_data['y']), len(c.eval_data['y'])) for c in self.selected_clients]
 
-    def train_model(self, num_epochs=1, batch_size=10, clients=None):
+    def train_model(self, num_epochs=1, batch_size=10, minibatch=None, clients=None):
         """Trains self.model on given clients.
         
         Trains model on self.selected_clients if clients=None;
@@ -44,6 +44,8 @@ class Server:
             clients: list of Client objects.
             num_epochs: Number of epochs to train.
             batch_size: Size of training batches.
+            minibatch: fraction of client's data to apply minibatch sgd,
+                None to use FedAvg
         Return:
             bytes_written: number of bytes written by each client to server 
                 dictionary with client ids as keys and integer values.
@@ -62,7 +64,7 @@ class Server:
             self.model.send_to([c])
             sys_metrics[c.id][BYTES_READ_KEY] += self.model.size
 
-            comp, num_samples, update = c.train(num_epochs, batch_size)
+            comp, num_samples, update = c.train(num_epochs, batch_size, minibatch)
             sys_metrics[c.id][LOCAL_COMPUTATIONS_KEY] = comp
 
             self.updates.append((num_samples, update))
