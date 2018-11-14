@@ -6,14 +6,14 @@ utils_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 utils_dir = os.path.join(utils_dir, 'utils')
 sys.path.append(utils_dir)
 
-import utils
+import util
 
 parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 cfd = os.path.join(parent_path, 'data', 'intermediate', 'class_file_dirs')
 wfd = os.path.join(parent_path, 'data', 'intermediate', 'write_file_dirs')
-class_file_dirs = utils.load_obj(cfd)
-write_file_dirs = utils.load_obj(wfd)
+class_file_dirs = util.load_obj(cfd)
+write_file_dirs = util.load_obj(wfd)
 
 class_file_hashes = []
 write_file_hashes = []
@@ -33,7 +33,7 @@ for tup in class_file_dirs:
     count += 1
 
 cfhd = os.path.join(parent_path, 'data', 'intermediate', 'class_file_hashes')
-utils.save_obj(class_file_hashes, cfhd)
+util.save_obj(class_file_hashes, cfhd)
 
 count = 0
 for tup in write_file_dirs:
@@ -50,4 +50,4 @@ for tup in write_file_dirs:
     count += 1
 
 wfhd = os.path.join(parent_path, 'data', 'intermediate', 'write_file_hashes')
-utils.save_obj(write_file_hashes, wfhd)
+util.save_obj(write_file_hashes, wfhd)

@@ -73,7 +73,7 @@ def print_dataset_stats(name):
         print(e, "\t", h)
 
     parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    data_dir = os.path.join(parent_path, 'data', name, 'data')
+    data_dir = os.path.join(parent_path, name, 'data')
 
     plt.hist(num_samples, bins = bins) 
     fig_name = "%s_hist_nolabel.png" % name

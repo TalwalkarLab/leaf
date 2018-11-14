@@ -74,7 +74,7 @@ def main():
         c_ids, c_groups, c_num_samples = server.get_clients_test_info()
 
         # Simulate server model training on selected clients' data
-        sys_metics = server.train_model(num_epochs=1, batch_size=10)
+        sys_metics = server.train_model(num_epochs=args.num_epochs, batch_size=args.batch_size, minibatch=args.minibatch)
         metrics_writer.print_metrics(i, c_ids, sys_metics, c_groups, c_num_samples, SYS_METRICS_PATH)
 
         # Update server model
@@ -123,11 +123,15 @@ def parse_args():
                     help='number of clients trained per round;',
                     type=int,
                     default=-1)
-    parser.add_argument('--batch-size',
+    parser.add_argument('--batch_size',
                     help='batch size when clients train on data;',
                     type=int,
                     default=10)
-    parser.add_argument('--num-epochs',
+    parser.add_argument('--minibatch',
+                    help='None for FedAvg, else fraction;',
+                    type=float,
+                    default=None)
+    parser.add_argument('--num_epochs',
                     help='number of epochs when clients train on data;',
                     type=int,
                     default=1)

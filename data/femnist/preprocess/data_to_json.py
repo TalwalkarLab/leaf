@@ -17,7 +17,7 @@ utils_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 utils_dir = os.path.join(utils_dir, 'utils')
 sys.path.append(utils_dir)
 
-import utils
+import util
 
 MAX_WRITERS = 100  # max number of writers per json file.
 
@@ -40,7 +40,7 @@ def relabel_class(c):
 parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 by_writer_dir = os.path.join(parent_path, 'data', 'intermediate', 'images_by_writer')
-writers = utils.load_obj(by_writer_dir)
+writers = util.load_obj(by_writer_dir)
 
 num_json = int(math.ceil(len(writers) / MAX_WRITERS))
 
