@@ -14,13 +14,16 @@ body {
     background-size: cover;
     padding-left: 70px;
     padding-right: 70px;
+    font-family: 'Roboto', sans-serif;
 }
 .title h1 {
 	font: normal 48px/1.5 sans-serif;
 	line-height: 0px;
+	font-family: 'Roboto', sans-serif;
 }
 .title h2 {
 	font: normal 24px/1.5 sans-serif;
+	font-family: 'Roboto', sans-serif;
 }
 .title img {
 	opacity: 0.8;
@@ -31,6 +34,7 @@ span.subtitle {
     text-align: center;
 	font: normal 24px/1.5 sans-serif;
 	color: #00a571;
+	font-family: 'Roboto', sans-serif;
 }
 
 span.description {
@@ -39,24 +43,27 @@ span.description {
 	width: 85%;
 	margin: 0 auto;
     padding: 10px;
+    font-family: 'Roboto', sans-serif;
 }
 
 .title h3{
 	text-align: center;
-	color: #00a571;
+	color: #376a31;
+	font-family: 'Roboto', sans-serif;
 }
 .title h3 a{
 	color:inherit;
 	text-decoration: none;
 	display: inline-block;
-	border: 1px solid #00a571;
+	border: 1px solid #376a31;
 	padding: 10px 15px;
 	border-radius: 3px;
 	font: bold 14px/1 'Open Sans', sans-serif;
 	text-transform: uppercase;
+	font-family: 'Roboto', sans-serif;
 }
 .title h3 a:hover{
-	background-color:#00a571;
+	background-color:#376a31;
 	transition:0.2s;
 	color:#fff;
 }
@@ -76,6 +83,7 @@ span.description {
 	max-width: 900px;
 	text-align: center;
 	margin: 0px auto;
+	font-family: 'Roboto', sans-serif;
 }
 
 .vertspace {
@@ -98,32 +106,38 @@ span.description {
 	margin-left: auto;
 	margin-right: auto;
 	background: white;
+	font-family: 'Roboto', sans-serif;
 }
+
 .infobox-1 {
 	padding: 5px 0;
 	background: white;
 	vertical-align: middle;
+	font-family: 'Roboto', sans-serif;
 }
 .infobox-2 {
 	padding: 5px 0;
 	background: white;
+	font-family: 'Roboto', sans-serif;
 }
 
 .collapsible {
-	background-color: #e2edeb;
+	background-color: #a2d36b;
 	font: normal 16px Helvetica;
-    color: #00a571;
+    color: #376a31;
     cursor: pointer;
     width: 100%;
     border: none;
 	text-align: left;
     outline: none;
 	font-size: 15px;
-	border-bottom: 3px solid #00a57135;
+	border-bottom: 3px solid #376a31;
+	font-family: 'Roboto', sans-serif;
 }
 
 .collapsible font{
 	padding: 10px;
+	font-family: 'Roboto', sans-serif;
 }
 
 .collapsible img{
@@ -131,7 +145,7 @@ span.description {
 }
 
 .active, .collapsible:hover {
-    background-color: #dce8e6;
+    background-color: #bbea85;
 }
 
 .content {
