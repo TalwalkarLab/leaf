@@ -12,9 +12,8 @@
   - ```--raw``` := include users' raw text data in all_data.json
 
 i.e.
-- ```./preprocess.sh -k 50 -t sample -tf 0.8``` (large-sized dataset)<br/>
-- ```./preprocess.sh -s niid --sf 0.3 -k 100 -t sample -tf 0.8``` (medium-sized dataset)<br/>
-- ```./preprocess.sh -s niid --sf 0.05 -k 100 -t sample -tf 0.8``` (small-sized dataset)
+- ```./preprocess.sh -s niid --sf 1.0 -k 0 -t sample -tf 0.8``` (full-sized dataset)<br/>
+- ```./preprocess.sh -s niid --sf 0.2 -k 0 -t sample -tf 0.8``` (small-sized dataset)
 ('-tf 0.8' reflects the train-test split used in the [FedAvg paper](https://arxiv.org/pdf/1602.05629.pdf))
 
 Make sure to delete the rem_user_data, sampled_data, test, and train subfolders in the data directory before re-running preprocess.sh

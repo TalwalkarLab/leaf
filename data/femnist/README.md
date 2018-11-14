@@ -12,9 +12,8 @@
     - ```--tf``` := fraction of data in training set, written as a decimal; default is 0.9
 
 i.e.
-- ```./preprocess.sh -k 64 -t sample``` (large-sized dataset)<br/>
-- ```./preprocess.sh -s niid --sf 0.5 -k 64 -t sample``` (medium-sized dataset)<br/>
-- ```./preprocess.sh -s niid --sf 0.1 -k 64 -t sample``` (small-sized dataset)
+- ```./preprocess.sh -s niid --sf 1.0 -k 0 -t sample``` (full-sized dataset)<br/>
+- ```./preprocess.sh -s niid --sf 0.05 -k 0 -t sample``` (small-sized dataset)
 
 Make sure to delete the rem_user_data, sampled_data, test, and train subfolders in the data directory before re-running preprocess.sh
 
