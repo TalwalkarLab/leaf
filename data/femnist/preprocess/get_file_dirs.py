@@ -15,7 +15,7 @@ utils_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 utils_dir = os.path.join(utils_dir, 'utils')
 sys.path.append(utils_dir)
 
-import utils
+import util
 
 parent_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
@@ -25,6 +25,7 @@ write_files = []  # (writer, file directory)
 class_dir = os.path.join(parent_path, 'data', 'raw_data', 'by_class')
 rel_class_dir = os.path.join('data', 'raw_data', 'by_class')
 classes = os.listdir(class_dir)
+classes = [c for c in classes if len(c) == 2]
 
 for cl in classes:
     cldir = os.path.join(class_dir, cl)
@@ -65,9 +66,9 @@ for write_part in write_parts:
             for image_dir in image_dirs:
                 write_files.append((writer, image_dir))
 
-utils.save_obj(
+util.save_obj(
     class_files,
     os.path.join(parent_path, 'data', 'intermediate', 'class_file_dirs'))
-utils.save_obj(
+util.save_obj(
     write_files,
     os.path.join(parent_path, 'data', 'intermediate', 'write_file_dirs'))
