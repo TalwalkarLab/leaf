@@ -7,33 +7,24 @@ import os
 import re
 
 def __txt_to_data(txt_dir, seq_length=80):
-    """Parses text file in given directory into data for next-character model
-
-    Reads text file line by line. For each line, generates data by prepending
-    the line with seq_length unknown character symbols and then sliding a
-    seq_length-sized window rightwards starting from the leftmost seq_length
-    characters. The corresponding datapoint (x,y) for each window is
-    (the characters in the window, the character after the window).
-
-    Currently representing unknown character symbol with ' '.
+    """Parses text file in given directory into data for next-character model.
 
     Args:
         txt_dir: path to text file
         seq_length: length of strings in X
     """
-    with open(txt_dir, 'r') as inf:
-        all_lines = inf.readlines()
-    for i, line in enumerate(all_lines):
-        all_lines[i] = re.sub(r"   *", r' ', line)
-    all_lines = [" " * seq_length + l for l in all_lines]
+    raw_text = ""
+    with open(txt_dir,'r') as inf:
+        raw_text = inf.read()
+    raw_text = raw_text.replace('\n', ' ')
+    raw_text = re.sub(r"   *", r' ', raw_text)
     dataX = []
     dataY = []
-    for line in all_lines:
-        for i in range(0, len(line) - seq_length, 1):
-            seq_in = line[i:i + seq_length]
-            seq_out = line[i + seq_length]
-            dataX.append(seq_in)
-            dataY.append(seq_out)
+    for i in range(0, len(raw_text) - seq_length, 1):
+        seq_in = raw_text[i:i + seq_length]
+        seq_out = raw_text[i + seq_length]
+        dataX.append(seq_in)
+        dataY.append(seq_out)
     return dataX, dataY
 
 def parse_data_in(data_dir, users_and_plays_path, raw=False):

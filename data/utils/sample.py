@@ -12,7 +12,7 @@ import os
 import random
 
 from constants import DATASETS
-from utils import iid_divide
+from util import iid_divide
 
 parser = argparse.ArgumentParser()
 
