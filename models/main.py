@@ -42,21 +42,20 @@ def main():
     # Suppress tf warnings
     tf.logging.set_verbosity(tf.logging.WARN)
 
-    # Create 2 models
+    # Create models
     model_params = MODEL_PARAMS[model_path]
     if args.lr != -1:
         model_params_list = list(model_params)
         model_params_list[0] = args.lr
         model_params = tuple(model_params_list)
     tf.reset_default_graph()
-    client_model = ClientModel(*model_params)
     server_model = ServerModel(ClientModel(*model_params))
 
     # Create server
     server = Server(server_model)
 
     # Create clients
-    clients = setup_clients(args.dataset, client_model)
+    clients = setup_clients(args.dataset, ClientModel, model_params, not args.parallel)
     print('%d Clients in Total' % len(clients))
 
     # Test untrained model on all clients
@@ -145,11 +144,15 @@ def parse_args():
                     type=float,
                     default=-1,
                     required=False)
+    parser.add_argument('-parallel',
+                help='execute client-related operations in parallel;',
+                action="store_true")
+    parser.set_defaults(parallel=False)
 
     return parser.parse_args()
 
 
-def setup_clients(dataset, model=None):
+def setup_clients(dataset, model, model_params, share_model=False):
     """Instantiates clients based on given train and test data directories.
 
     Return:
@@ -161,7 +164,11 @@ def setup_clients(dataset, model=None):
     users, groups, train_data, test_data = read_data(train_data_dir, test_data_dir)
     if len(groups) == 0:
         groups = [[] for _ in users]
-    all_clients = [Client(u, g, train_data[u], test_data[u], model) for u, g in zip(users, groups)]
+    if share_model:
+        client_model = model(*model_params)
+        all_clients = [Client(u, g, train_data[u], test_data[u], client_model) for u, g in zip(users, groups)]
+    else:
+        all_clients = [Client(u, g, train_data[u], test_data[u], model(*model_params)) for u, g in zip(users, groups)]
     return all_clients
 
 
