@@ -55,6 +55,4 @@ class Client:
 
     @model.setter
     def model(self, model):
-        warnings.warn('The current implementation shares the model among all clients.'
-                      'Setting it on one client will effectively modify all clients.')
         self._model = model

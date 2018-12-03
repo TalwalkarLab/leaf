@@ -55,10 +55,13 @@ def main():
     server = Server(server_model)
 
     # Create clients
-    clients = setup_clients(args.dataset, ClientModel, model_params, not args.parallel)
+    clients = setup_clients(args.dataset, ClientModel, model_params)
+    num_threads = args.num_threads if args.parallel else 1
+    client_models = [ClientModel(*model_params) for _ in range(num_threads)]
     print('%d Clients in Total' % len(clients))
 
     # Test untrained model on all clients
+    server.send_model(clients, client_models=client_models)
     stat_metrics = server.test_model(clients)
     all_ids, all_groups, all_num_samples = server.get_clients_test_info(clients)
     metrics_writer.print_metrics(0, all_ids, stat_metrics, all_groups, all_num_samples, STAT_METRICS_PATH)
@@ -73,7 +76,9 @@ def main():
         c_ids, c_groups, c_num_samples = server.get_clients_test_info()
 
         # Simulate server model training on selected clients' data
-        sys_metics = server.train_model(num_epochs=args.num_epochs, batch_size=args.batch_size, minibatch=args.minibatch)
+        server.send_model(client_models=client_models)
+        sys_metics = server.train_model(num_epochs=args.num_epochs, batch_size=args.batch_size, 
+                                        minibatch=args.minibatch, num_threads=num_threads)
         metrics_writer.print_metrics(i, c_ids, sys_metics, c_groups, c_num_samples, SYS_METRICS_PATH)
 
         # Update server model
@@ -118,7 +123,7 @@ def parse_args():
                     help='evaluate every ____ rounds;',
                     type=int,
                     default=-1)
-    parser.add_argument('--clients-per-round',
+    parser.add_argument('--clients_per_round',
                     help='number of clients trained per round;',
                     type=int,
                     default=-1)
@@ -147,12 +152,15 @@ def parse_args():
     parser.add_argument('-parallel',
                 help='execute client-related operations in parallel;',
                 action="store_true")
+    parser.add_argument('-num_threads',
+                    help='number of threads to use if running in parallel;',
+                    type=int,
+                    default=8)
     parser.set_defaults(parallel=False)
 
     return parser.parse_args()
 
-
-def setup_clients(dataset, model, model_params, share_model=False):
+def setup_clients(dataset, model, model_params):
     """Instantiates clients based on given train and test data directories.
 
     Return:
@@ -164,11 +172,7 @@ def setup_clients(dataset, model, model_params, share_model=False):
     users, groups, train_data, test_data = read_data(train_data_dir, test_data_dir)
     if len(groups) == 0:
         groups = [[] for _ in users]
-    if share_model:
-        client_model = model(*model_params)
-        all_clients = [Client(u, g, train_data[u], test_data[u], client_model) for u, g in zip(users, groups)]
-    else:
-        all_clients = [Client(u, g, train_data[u], test_data[u], model(*model_params)) for u, g in zip(users, groups)]
+    all_clients = [Client(u, g, train_data[u], test_data[u]) for u, g in zip(users, groups)]
     return all_clients
 
 

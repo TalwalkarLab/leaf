@@ -1,5 +1,7 @@
+import math
 import random
 
+from threading import Thread
 
 from baseline_constants import BYTES_WRITTEN_KEY, BYTES_READ_KEY, LOCAL_COMPUTATIONS_KEY
 
@@ -33,7 +35,31 @@ class Server:
         self.selected_clients = clients_chosen
         return [(len(c.train_data['y']), len(c.eval_data['y'])) for c in self.selected_clients]
 
-    def train_model(self, num_epochs=1, batch_size=10, minibatch=None, clients=None):
+    def send_model(self, clients=None, client_models=None):
+        """Sends server model to given clients.
+
+        Args:
+            clients: list of Client objects.
+            client_models: list of models; used to parallelize training
+        """
+        if clients is None:
+            clients = self.selected_clients
+        num_client_models = len(client_models)
+        for i, c in enumerate(clients):
+            client_model = client_models[i%num_client_models]
+            c.model = client_model
+        self.model.send_to(clients[:num_client_models])
+
+    def _train_client(self, c, num_epochs, batch_size, minibatch, sys_metrics):
+        '''Trains given client.
+
+        Helper for train_model
+        '''
+        comp, num_samples, update = c.train(num_epochs, batch_size, minibatch)
+        sys_metrics[c.id][LOCAL_COMPUTATIONS_KEY] = comp
+        self.updates.append((num_samples, update))
+
+    def train_model(self, num_epochs=1, batch_size=10, minibatch=None, clients=None, num_threads=1):
         """Trains self.model on given clients.
         
         Trains model on self.selected_clients if clients=None;
@@ -46,6 +72,7 @@ class Server:
             batch_size: Size of training batches.
             minibatch: fraction of client's data to apply minibatch sgd,
                 None to use FedAvg
+            num_threads: number of threads; used to parallelize training
         Return:
             bytes_written: number of bytes written by each client to server 
                 dictionary with client ids as keys and integer values.
@@ -60,15 +87,30 @@ class Server:
             c.id: {BYTES_WRITTEN_KEY: 0,
                    BYTES_READ_KEY: 0,
                    LOCAL_COMPUTATIONS_KEY: 0} for c in clients}
-        for c in clients:
-            self.model.send_to([c])
-            sys_metrics[c.id][BYTES_READ_KEY] += self.model.size
+        num_threads = min(num_threads, len(clients))
+        if num_threads==1:
+            for c in clients:
+                sys_metrics[c.id][BYTES_READ_KEY] += self.model.size
 
-            comp, num_samples, update = c.train(num_epochs, batch_size, minibatch)
-            sys_metrics[c.id][LOCAL_COMPUTATIONS_KEY] = comp
+                self._train_client(c, num_epochs, batch_size, minibatch, sys_metrics)
+                
+                sys_metrics[c.id][BYTES_WRITTEN_KEY] += self.model.size
+        else:
+            threads = [None] * num_threads
+            num_thread_batches = int(math.ceil(len(clients)/num_threads))
+            for i in range(num_thread_batches):
+                curr_clients = clients[i*num_threads:(i+1)*num_threads]
+                for j, c in enumerate(curr_clients):
+                    sys_metrics[c.id][BYTES_READ_KEY] += 2*self.model.size
 
-            self.updates.append((num_samples, update))
-            sys_metrics[c.id][BYTES_WRITTEN_KEY] += self.model.size
+                    threads[j] = Thread(target=self._train_client, 
+                        args=(c, num_epochs, batch_size, minibatch, sys_metrics))
+                    threads[j].start()
+
+                    sys_metrics[c.id][BYTES_WRITTEN_KEY] += self.model.size
+                for j in range(len(threads)):
+                    threads[j].join()
+
         return sys_metrics
 
     def update_model(self):
