@@ -24,13 +24,8 @@ class Server:
             list of (num_train_samples, num_test_samples)
         """
         num_clients = min(num_clients, len(possible_clients))
-        indices = [i for i, _ in enumerate(possible_clients)]
-        chosen_indices = random.sample(indices, num_clients)
-        clients_chosen = []
-        for i in chosen_indices:
-            clients_chosen.append(possible_clients[i])
+        self.selected_clients = random.sample(possible_clients, num_clients)
 
-        self.selected_clients = clients_chosen
         return [(len(c.train_data['y']), len(c.eval_data['y'])) for c in self.selected_clients]
 
     def train_model(self, num_epochs=1, batch_size=10, minibatch=None, clients=None):
