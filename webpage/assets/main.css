@@ -46,6 +46,16 @@ span.description {
     font-family: 'Roboto', sans-serif;
 }
 
+
+span.citation {
+	text-align: left;
+	font: normal 16px/1.5 Helvetica;
+	width: 85%;
+	margin: 0 auto;
+    padding: 10px;
+    font-family: 'Roboto', sans-serif;
+}
+
 .title h3{
 	text-align: center;
 	color: #376a31;
