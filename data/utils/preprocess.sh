@@ -22,93 +22,93 @@ CHECKSUM_FNAME="${META_DIR}/dir-checksum.md5"
 
 while [[ $# -gt 0 ]]
 do
-    key="$1"
+key="$1"
 
-    # TODO: Use getopts instead of creating cases!
-    case $key in
-        --name)
-        NAME="$2"
-        shift # past argument
-        if [ ${SAMPLE:0:1} = "-" ]; then
-            NAME="sent140"
-        else
-            shift # past value
-        fi
-        ;;
-        -s)
-        SAMPLE="$2"
-        shift # past argument
-        if [ ${SAMPLE:0:1} = "-" ]; then
-            SAMPLE=""
-        else
-            shift # past value
-        fi
-        ;;
-        --iu)
-        IUSER="$2"
-        shift # past argument
-        if [ ${IUSER:0:1} = "-" ]; then
-            IUSER=""
-        else
-            shift # past value
-        fi
-        ;;
-        --sf)
-        SFRAC="$2"
-        shift # past argument
-        if [ ${SFRAC:0:1} = "-" ]; then
-            SFRAC=""
-        else
-            shift # past value
-        fi
-        ;;
-        -k)
-        MINSAMPLES="$2"
-        shift # past argument
-        if [ ${MINSAMPLES:0:1} = "-" ]; then
-            MINSAMPLES=""
-        else
-            shift # past value
-        fi
-        ;;
-        -t)
-        TRAIN="$2"
-        shift # past argument
-        if [ -z "$TRAIN" ] || [ ${TRAIN:0:1} = "-" ]; then
-            TRAIN=""
-        else
-            shift # past value
-        fi
-        ;;
-        --tf)
-        TFRAC="$2"
-        shift # past argument
-        if [ ${TFRAC:0:1} = "-" ]; then
-            TFRAC=""
-        else
-            shift # past value
-        fi
-        ;;
-        --smplseed)
-        SAMPLING_SEED="$2"
-        shift # past argument
-        ;;
-        --spltseed)
-        SPLIT_SEED="$2"
-        shift # past argument
-        ;;
-        --nochecksum)
-        NO_CHECKSUM="true"
-        shift # past argument
-        ;;
-        --verify)
-        VERIFICATION_FILE="$2"
-        shift # past argument
-        ;;
-        *)    # unknown option
-        shift # past argument
-        ;;
-    esac
+# TODO: Use getopts instead of creating cases!
+case $key in
+    --name)
+    NAME="$2"
+    shift # past argument
+    if [ ${SAMPLE:0:1} = "-" ]; then
+        NAME="sent140"
+    else
+        shift # past value
+    fi
+    ;;
+    -s)
+    SAMPLE="$2"
+    shift # past argument
+    if [ ${SAMPLE:0:1} = "-" ]; then
+        SAMPLE=""
+    else
+        shift # past value
+    fi
+    ;;
+    --iu)
+    IUSER="$2"
+    shift # past argument
+    if [ ${IUSER:0:1} = "-" ]; then
+        IUSER=""
+    else
+        shift # past value
+    fi
+    ;;
+    --sf)
+    SFRAC="$2"
+    shift # past argument
+    if [ ${SFRAC:0:1} = "-" ]; then
+        SFRAC=""
+    else
+        shift # past value
+    fi
+    ;;
+    -k)
+    MINSAMPLES="$2"
+    shift # past argument
+    if [ ${MINSAMPLES:0:1} = "-" ]; then
+        MINSAMPLES=""
+    else
+        shift # past value
+    fi
+    ;;
+    -t)
+    TRAIN="$2"
+    shift # past argument
+    if [ -z "$TRAIN" ] || [ ${TRAIN:0:1} = "-" ]; then
+        TRAIN=""
+    else
+        shift # past value
+    fi
+    ;;
+    --tf)
+    TFRAC="$2"
+    shift # past argument
+    if [ ${TFRAC:0:1} = "-" ]; then
+        TFRAC=""
+    else
+        shift # past value
+    fi
+    ;;
+    --smplseed)
+    SAMPLING_SEED="$2"
+    shift # past argument
+    ;;
+    --spltseed)
+    SPLIT_SEED="$2"
+    shift # past argument
+    ;;
+    --nochecksum)
+    NO_CHECKSUM="true"
+    shift # past argument
+    ;;
+    --verify)
+    VERIFICATION_FILE="$2"
+    shift # past argument
+    ;;
+    *)    # unknown option
+    shift # past argument
+    ;;
+esac
 done
 
 # --------------------
