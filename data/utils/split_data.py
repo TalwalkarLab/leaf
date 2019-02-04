@@ -6,9 +6,12 @@ import argparse
 import json
 import os
 import random
+import time
 import sys
 
-from constants import DATASETS
+from collections import OrderedDict
+
+from constants import DATASETS, SEED_FILES
 
 def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
     '''used in split-by-user case'''
@@ -87,6 +90,11 @@ parser.add_argument('--frac',
                 help='fraction in training set; default: 0.9;',
                 type=float,
                 default=0.9)
+parser.add_argument('--seed',
+                help='seed for random partitioning of test/train data',
+                type=int,
+                default=None)
+
 parser.set_defaults(user=False)
 
 args = parser.parse_args()
@@ -109,6 +117,18 @@ if len(files) == 0:
     files = os.listdir(subdir)
 files = [f for f in files if f.endswith('.json')]
 
+rng_seed = (args.seed if args.seed is not None else int(time.time()))
+rng = random.Random(rng_seed)
+if os.environ.get('LEAF_DATA_META_DIR') is not None:
+    seed_fname = os.path.join(os.environ.get('LEAF_DATA_META_DIR'), SEED_FILES['split'])
+    with open(seed_fname, 'w+') as f:
+        f.write("# split_seed used by sampling script - supply as "
+                "--spltseed to preprocess.sh or --seed to utils/split_data.py\n")
+        f.write(str(rng_seed))
+    print ("- random seed written out to {file}".format(file=seed_fname))
+else:
+    print ("- using random seed '{seed}' for sampling".format(seed=rng_seed))
+
 arg_label = str(args.frac)
 arg_label = arg_label[2:]
 
@@ -127,7 +147,9 @@ if (args.user):
     for f in files:
         file_dir = os.path.join(subdir, f)
         with open(file_dir, 'r') as inf:
-            data = json.load(inf)
+            # Load data into an OrderedDict, to prevent ordering changes
+            # and enable reproducibility
+            data = json.load(inf, object_pairs_hook=OrderedDict)
         if include_hierarchy:
             user_files.extend([(u, h, ns, f) for (u, h, ns) in 
                 zip(data['users'], data['hierarchies'], data['num_samples'])])
@@ -139,7 +161,7 @@ if (args.user):
     num_users = len(user_files)
     num_train_users = int(args.frac * num_users)
     indices = [i for i in range(num_users)]
-    train_indices = random.sample(indices, num_train_users)
+    train_indices = rng.sample(indices, num_train_users)
     train_blist = [False for i in range(num_users)]
     for i in train_indices:
         train_blist[i] = True
@@ -163,7 +185,9 @@ else:
     for f in files:
         file_dir = os.path.join(subdir, f)
         with open(file_dir, 'r') as inf:
-            data = json.load(inf)
+            # Load data into an OrderedDict, to prevent ordering changes
+            # and enable reproducibility
+            data = json.load(inf, object_pairs_hook=OrderedDict)
 
         num_samples_train = []
         user_data_train = {}
@@ -190,7 +214,7 @@ else:
                 num_samples_test.append(num_test_samples)
 
                 indices = [j for j in range(curr_num_samples)]
-                train_indices = random.sample(indices, num_train_samples)
+                train_indices = rng.sample(indices, num_train_samples)
                 train_blist = [False for _ in range(curr_num_samples)]
                 for j in train_indices:
                     train_blist[j] = True

@@ -10,8 +10,11 @@ import argparse
 import json
 import os
 import random
+import time
 
-from constants import DATASETS
+from collections import OrderedDict
+
+from constants import DATASETS, SEED_FILES
 from util import iid_divide
 
 parser = argparse.ArgumentParser()
@@ -37,6 +40,10 @@ parser.add_argument('--u',
                       'default: 0.01;'),
                 type=float,
                 default=0.01)
+parser.add_argument('--seed',
+                help='seed for random sampling of data',
+                type=int,
+                default=None)
 parser.set_defaults(iid=False)
 
 args = parser.parse_args()
@@ -50,11 +57,26 @@ subdir = os.path.join(data_dir, 'all_data')
 files = os.listdir(subdir)
 files = [f for f in files if f.endswith('.json')]
 
+rng_seed = (seed if args.seed is not None else int(time.time())
+rng = random.Random(rng_seed)
+print (os.environ.get('LEAF_DATA_META_DIR'))
+if os.environ.get('LEAF_DATA_META_DIR') is not None:
+    seed_fname = os.path.join(os.environ.get('LEAF_DATA_META_DIR'), SEED_FILES['sampling'])
+    with open(seed_fname, 'w+') as f:
+        f.write("# sampling_seed used by sampling script - supply as "
+                "--smplseed to preprocess.sh or --seed to utils/sample.py\n")
+        f.write(str(rng_seed))
+    print ("- random seed written out to {file}".format(file=seed_fname))
+else:
+    print ("- using random seed '{seed}' for sampling".format(seed=rng_seed))
+
 new_user_count = 0 # for iid case
 for f in files:
     file_dir = os.path.join(subdir, f)
     with open(file_dir, 'r') as inf:
-        data = json.load(inf)
+        # Load data into an OrderedDict, to prevent ordering changes
+        # and enable reproducibility
+        data = json.load(inf, object_pairs_hook=OrderedDict)
 
     num_users = len(data['users'])
 
@@ -75,9 +97,7 @@ for f in files:
             num_new_users += 1
 
         indices = [i for i in range(tot_num_samples)]
-        new_indices = random.sample(indices, num_new_samples)
-        # TODO: seed this random
-
+        new_indices = rng.sample(indices, num_new_samples)
         users = [str(i+new_user_count) for i in range(num_new_users)]
 
         user_data = {}
@@ -103,9 +123,9 @@ for f in files:
         users_and_hiers = None
         if 'hierarchies' in data:
             users_and_hiers = list(zip(users, data['hierarchies']))
-            random.shuffle(users_and_hiers)
+            rng.shuffle(users_and_hiers)
         else:
-            random.shuffle(users)
+            rng.shuffle(users)
         user_i = 0
         num_samples = []
         user_data = {}
@@ -127,7 +147,7 @@ for f in files:
             if (ctot_num_samples + cnum_samples > num_new_samples):
                 cnum_samples = num_new_samples - ctot_num_samples
                 indices = [i for i in range(cnum_samples)]
-                new_indices = random.sample(indices, cnum_samples)
+                new_indices = rng.sample(indices, cnum_samples)
                 x = []
                 y = []
                 for i in new_indices:
