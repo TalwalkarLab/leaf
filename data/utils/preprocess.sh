@@ -172,15 +172,13 @@ if [ "$CONT_SCRIPT" = true ] && [ ! $SAMPLE = "na" ]; then
 
         cd ../utils
 
-        SEED_ARGUMENT=""
-        if [ -n "${SAMPLING_SEED}" ]; then
-            SEED_ARGUMENT="--seed ${SAMPLING_SEED}"
-        fi
+        # Defaults to -1 if not specified, causes script to randomly generate seed
+        SEED_ARGUMENT="${SAMPLING_SEED:--1}" 
 
         if [ $SAMPLE = "iid" ]; then
-            LEAF_DATA_META_DIR=${META_DIR} python3 sample.py $NAMETAG --iid $IUSERTAG $SFRACTAG ${SEED_ARGUMENT}
+            LEAF_DATA_META_DIR=${META_DIR} python3 sample.py $NAMETAG --iid $IUSERTAG $SFRACTAG --seed ${SEED_ARGUMENT}
         else
-            LEAF_DATA_META_DIR=${META_DIR} python3 sample.py $NAMETAG $SFRACTAG ${SEED_ARGUMENT}
+            LEAF_DATA_META_DIR=${META_DIR} python3 sample.py $NAMETAG $SFRACTAG --seed ${SEED_ARGUMENT}
         fi
 
         cd ../$NAME
@@ -227,17 +225,15 @@ if [ "$CONT_SCRIPT" = true ] && [ ! $TRAIN = "na" ]; then
 
         cd ../utils
 
-        SEED_ARGUMENT=""
-        if [ -n "${SPLIT_SEED}" ]; then
-            SEED_ARGUMENT="--seed ${SPLIT_SEED}"
-        fi
+        # Defaults to -1 if not specified, causes script to randomly generate seed
+        SEED_ARGUMENT="${SPLIT_SEED:--1}"
 
         if [ -z $TRAIN ]; then
-            LEAF_DATA_META_DIR=${META_DIR} python3 split_data.py $NAMETAG $TFRACTAG ${SEED_ARGUMENT}
+            LEAF_DATA_META_DIR=${META_DIR} python3 split_data.py $NAMETAG $TFRACTAG --seed ${SEED_ARGUMENT}
         elif [ $TRAIN = "user" ]; then
-            LEAF_DATA_META_DIR=${META_DIR} python3 split_data.py $NAMETAG --by_user $TFRACTAG ${SEED_ARGUMENT}
+            LEAF_DATA_META_DIR=${META_DIR} python3 split_data.py $NAMETAG --by_user $TFRACTAG --seed ${SEED_ARGUMENT}
         elif [ $TRAIN = "sample" ]; then
-            LEAF_DATA_META_DIR=${META_DIR} python3 split_data.py $NAMETAG --by_sample $TFRACTAG ${SEED_ARGUMENT}
+            LEAF_DATA_META_DIR=${META_DIR} python3 split_data.py $NAMETAG --by_sample $TFRACTAG --seed ${SEED_ARGUMENT}
         fi
 
         cd ../$NAME
