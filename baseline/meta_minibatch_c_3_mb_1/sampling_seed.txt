@@ -1,2 +1,0 @@
-# sampling_seed used by sampling script - supply as --smplseed to preprocess.sh or --seed to utils/sample.py
-1549786595
