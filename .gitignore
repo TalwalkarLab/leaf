@@ -1,5 +1,7 @@
+*.pyc
 .DS_Store
 .idea
+build/
 data/*/data
 models/__pycache__/
 models/*/__pycache__/
@@ -8,3 +10,7 @@ utils/__pycache__/
 models/checkpoints/
 models/metrics/*.csv
 models/sent140/embs.json
+_build/
+_static/
+_templates/
+autodoc/
