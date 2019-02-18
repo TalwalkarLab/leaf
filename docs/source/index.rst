@@ -38,7 +38,7 @@ See the source code repository on GitHub: https://github.com/TalwalkarLab/leaf
    :hidden:
    :caption: Additional Information
 
-   authors
+   contact
    citations
 
 `Getting started <install/get_leaf.html>`_
@@ -57,7 +57,7 @@ A set of examples illustrating the use of different models and datasets with LEA
 The exact API of all functions and classes, as given in the
 docstring. 
 
-`Authors <authors.html>`_
+`Contact <contact.html>`_
 -------------------------
 
 Contact information of LEAF authors

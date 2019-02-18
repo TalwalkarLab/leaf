@@ -11,6 +11,5 @@ models/checkpoints/
 models/metrics/*.csv
 models/sent140/embs.json
 _build/
-_static/
 _templates/
 autodoc/
