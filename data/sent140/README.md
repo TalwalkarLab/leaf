@@ -10,6 +10,8 @@ Run preprocess.sh with a choice of the following tags:
 - ```-k``` := minimum number of samples per user
 - ```-t``` := 'user' to partition users into train-test groups, or 'sample' to partition each user's samples into train-test groups
 - ```--tf``` := fraction of data in training set, written as a decimal; default is 0.9
+- ```--smplseed``` := seed to be used before random sampling of data
+- ```--spltseed``` :=  seed to be used before random split of data
 
 i.e. 
 - ```./preprocess.sh -s niid --sf 1.0 -k 0 -t sample``` (full-sized dataset)<br/>

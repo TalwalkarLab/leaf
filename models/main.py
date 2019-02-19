@@ -5,6 +5,7 @@ import importlib
 import numpy as np
 import os
 import sys
+import random
 import tensorflow as tf
 
 import metrics.writer as metrics_writer
@@ -24,6 +25,10 @@ SYS_METRICS_PATH = 'metrics/sys_metrics.csv'
 def main():
 
     args = parse_args()
+
+    # Set the random seed if provided (affects client sampling, and batching)
+    if args.seed is not None:
+        random.seed(args.seed)
 
     model_path = '%s/%s.py' % (args.dataset, args.model)
     if not os.path.exists(model_path):
@@ -127,6 +132,10 @@ def parse_args():
                     help='batch size when clients train on data;',
                     type=int,
                     default=10)
+    parser.add_argument('--seed',
+                    help='seed for random client sampling and batch splitting',
+                    type=int,
+                    default=None)
 
     # Minibatch doesn't support num_epochs, so make them mutually exclusive
     epoch_capability_group = parser.add_mutually_exclusive_group()
