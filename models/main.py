@@ -127,14 +127,18 @@ def parse_args():
                     help='batch size when clients train on data;',
                     type=int,
                     default=10)
-    parser.add_argument('--minibatch',
+
+    # Minibatch doesn't support num_epochs, so make them mutually exclusive
+    epoch_capability_group = parser.add_mutually_exclusive_group()
+    epoch_capability_group.add_argument('--minibatch',
                     help='None for FedAvg, else fraction;',
                     type=float,
                     default=None)
-    parser.add_argument('--num_epochs',
+    epoch_capability_group.add_argument('--num_epochs',
                     help='number of epochs when clients train on data;',
                     type=int,
                     default=1)
+
     parser.add_argument('-t',
                     help='simulation time: small, medium, or large;',
                     type=str,

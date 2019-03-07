@@ -15,7 +15,7 @@ class Client:
         """Trains on self.model using the client's train_data.
 
         Args:
-            num_epochs: Number of epochs to train.
+            num_epochs: Number of epochs to train. Unsupported if minibatch is provided (minibatch has only 1 epoch)
             batch_size: Size of training batches.
             minibatch: fraction of client's data to apply minibatch sgd,
                 None to use FedAvg
@@ -33,6 +33,9 @@ class Client:
             num_data = max(1, int(frac*len(self.train_data["x"])))
             xs, ys = zip(*random.sample(list(zip(self.train_data["x"], self.train_data["y"])), num_data))
             data = {"x": xs, "y": ys}
+
+            # Minibatch trains for only 1 epoch - multiple local epochs don't make sense!
+            num_epochs = 1
             comp, update = self.model.train(data, num_epochs, num_data)
         num_train_samples = len(data)
         return comp, num_train_samples, update
