@@ -6,14 +6,37 @@ body {
 	font:14px/1.5 Helvetica;
 	padding:0;
 	margin:0;
+	color: #282828;
 }
-
-.title {
+.background{
+	background-color: #E8E8E8;
+	padding-top: 10px;
+}
+.toptitle {
 	text-align: center;
     margin-top: 50px;
     background-size: cover;
     padding-left: 70px;
     padding-right: 70px;
+    font-family: 'Roboto', sans-serif;
+}
+.toptitle h1 {
+	font: normal 48px/1.5 sans-serif;
+	line-height: 0px;
+	font-family: 'Roboto', sans-serif;
+}
+.toptitle h2 {
+	margin-top: -20px;
+	margin-bottom: 0px;
+	font: normal 24px/1.5 sans-serif;
+	font-family: 'Roboto', sans-serif;
+}
+.title {
+	text-align: center;
+    margin-top: 50px;
+    background-size: cover;
+    padding-left: 100px;
+    padding-right: 100px;
     font-family: 'Roboto', sans-serif;
 }
 .title h1 {
@@ -65,15 +88,15 @@ span.citation {
 	color:inherit;
 	text-decoration: none;
 	display: inline-block;
-	border: 1px solid #376a31;
+	border: 1px solid #196619;
 	padding: 10px 15px;
 	border-radius: 3px;
-	font: bold 14px/1 'Open Sans', sans-serif;
+	font: bold 16px/1 'Open Sans', sans-serif;
 	text-transform: uppercase;
 	font-family: 'Roboto', sans-serif;
 }
 .title h3 a:hover{
-	background-color:#376a31;
+	background-color:#196619;
 	transition:0.2s;
 	color:#fff;
 }
@@ -132,16 +155,16 @@ span.citation {
 }
 
 .collapsible {
-	background-color: #a2d36b;
+	background-color: #E8E8E8;
 	font: normal 16px Helvetica;
-    color: #376a31;
+    color: #282828;
     cursor: pointer;
     width: 100%;
     border: none;
 	text-align: left;
     outline: none;
 	font-size: 15px;
-	border-bottom: 3px solid #376a31;
+	border-bottom: 3px solid white;
 	font-family: 'Roboto', sans-serif;
 }
 
@@ -155,12 +178,13 @@ span.citation {
 }
 
 .active, .collapsible:hover {
-    background-color: #bbea85;
+    background-color: #196619;
+    color: white;
 }
 
 .content {
 	background-color: #f1f1f1;
-	border-bottom: 1px solid #00a57135;
+	border-bottom: 1px solid white;
 	max-height: 0;
     overflow: hidden;
     transition: max-height 0.2s ease-out;
