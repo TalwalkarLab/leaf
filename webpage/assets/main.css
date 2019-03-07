@@ -69,6 +69,10 @@ span.description {
     font-family: 'Roboto', sans-serif;
 }
 
+span.description a {
+	color: #376a31;
+	text-decoration: none;
+}
 
 span.citation {
 	text-align: left;

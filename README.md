@@ -1,5 +1,10 @@
 # Leaf: A Benchmark for Federated Settings
 
+## Resources
+
+  * **Homepage:** [leaf.cmu.edu](leaf.cmu.edu)
+  * **Paper:** ["LEAF: A Benchmark for Federated Settings"](https://arxiv.org/abs/1812.01097)
+
 ## Datasets
 
 1. FEMNIST
