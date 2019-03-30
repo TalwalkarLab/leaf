@@ -1,0 +1,436 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>utils package &mdash; LEAF 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/customheader.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Contact Us" href="../contact.html" />
+    <link rel="prev" title="server module" href="server.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> LEAF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/get_leaf.html">Installation and Contribution</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">General Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">models</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="baseline_constants.html">baseline_constants module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="client.html">client module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="metrics.html">metrics package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="model.html">model module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="server.html">server module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">utils package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.constants">utils.constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.language_utils">utils.language_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.model_utils">utils.model_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils.tf_utils">utils.tf_utils module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contact.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citations.html">Citing LEAF</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">LEAF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">models</a> &raquo;</li>
+        
+      <li>utils package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/autodoc/utils.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="utils-package">
+<h1>utils package<a class="headerlink" href="#utils-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-utils.constants">
+<span id="utils-constants-module"></span><h2>utils.constants module<a class="headerlink" href="#module-utils.constants" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-utils.language_utils">
+<span id="utils-language-utils-module"></span><h2>utils.language_utils module<a class="headerlink" href="#module-utils.language_utils" title="Permalink to this headline">¶</a></h2>
+<p>Utils for language models.</p>
+<dl class="function">
+<dt id="utils.language_utils.bag_of_words">
+<code class="descclassname">utils.language_utils.</code><code class="descname">bag_of_words</code><span class="sig-paren">(</span><em>line</em>, <em>vocab</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/language_utils.html#bag_of_words"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.language_utils.bag_of_words" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns bag of words representation of given phrase using given vocab.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line</strong> – string representing phrase to be parsed</li>
+<li><strong>vocab</strong> – dictionary with words as keys and indices as values</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">integer list</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.language_utils.get_word_emb_arr">
+<code class="descclassname">utils.language_utils.</code><code class="descname">get_word_emb_arr</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/language_utils.html#get_word_emb_arr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.language_utils.get_word_emb_arr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="utils.language_utils.letter_to_vec">
+<code class="descclassname">utils.language_utils.</code><code class="descname">letter_to_vec</code><span class="sig-paren">(</span><em>letter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/language_utils.html#letter_to_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.language_utils.letter_to_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns one-hot representation of given letter.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.language_utils.line_to_indices">
+<code class="descclassname">utils.language_utils.</code><code class="descname">line_to_indices</code><span class="sig-paren">(</span><em>line</em>, <em>indd</em>, <em>max_words=25</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/language_utils.html#line_to_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.language_utils.line_to_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts given phrase into list of word indices</p>
+<p>if the phrase has more than max_words words, returns a list containing
+indices of the first max_words words
+if the phrase has less than max_words words, repeatedly appends integer
+representing unknown index to returned list until the list’s length is
+max_words</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line</strong> – string representing phrase/sequence of words</li>
+<li><strong>indd</strong> – dictionary with string words as keys and int indices as values</li>
+<li><strong>max_words</strong> – maximum number of word indices in returned list</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list of word indices, one index for each word in phrase</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">indl</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.language_utils.split_line">
+<code class="descclassname">utils.language_utils.</code><code class="descname">split_line</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/language_utils.html#split_line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.language_utils.split_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split given line/phrase into list of words</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> – string representing phrase to be split</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of strings, with each string representing a word</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.language_utils.val_to_vec">
+<code class="descclassname">utils.language_utils.</code><code class="descname">val_to_vec</code><span class="sig-paren">(</span><em>size</em>, <em>val</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/language_utils.html#val_to_vec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.language_utils.val_to_vec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts target into one-hot.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>size</strong> – Size of vector.</li>
+<li><strong>val</strong> – Integer in range [0, size].</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">one-hot vector with a 1 in the val element.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">vec</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.language_utils.word_to_indices">
+<code class="descclassname">utils.language_utils.</code><code class="descname">word_to_indices</code><span class="sig-paren">(</span><em>word</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/language_utils.html#word_to_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.language_utils.word_to_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns a list of character indices</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>word</strong> – string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int list with length len(word)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">indices</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-utils.model_utils">
+<span id="utils-model-utils-module"></span><h2>utils.model_utils module<a class="headerlink" href="#module-utils.model_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="utils.model_utils.batch_data">
+<code class="descclassname">utils.model_utils.</code><code class="descname">batch_data</code><span class="sig-paren">(</span><em>data</em>, <em>batch_size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/model_utils.html#batch_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.model_utils.batch_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>data is a dict := {‘x’: [list], ‘y’: [list]}
+returns x, y, which are both lists of size-batch_size lists</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.model_utils.read_data">
+<code class="descclassname">utils.model_utils.</code><code class="descname">read_data</code><span class="sig-paren">(</span><em>train_data_dir</em>, <em>test_data_dir</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/model_utils.html#read_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.model_utils.read_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>parses data in given train and test data directories</p>
+<p>assumes:
+- the data in the input directories are .json files with</p>
+<blockquote>
+<div>keys ‘users’ and ‘user_data’</div></blockquote>
+<ul class="simple">
+<li>the set of train set users is the same as the set of test set users</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of client ids
+groups: list of group ids; empty list if none found
+train_data: dictionary of train data
+test_data: dictionary of test data</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">clients</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-utils.tf_utils">
+<span id="utils-tf-utils-module"></span><h2>utils.tf_utils module<a class="headerlink" href="#module-utils.tf_utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="utils.tf_utils.graph_size">
+<code class="descclassname">utils.tf_utils.</code><code class="descname">graph_size</code><span class="sig-paren">(</span><em>graph</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/utils/tf_utils.html#graph_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.tf_utils.graph_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the size of the given graph in bytes</p>
+<p>The size of the graph is calculated by summing up the sizes of each
+trainable variable. The sizes of variables are calculated by multiplying
+the number of bytes in their dtype with their number of elements, captured
+in their shape attribute</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>graph</strong> – TF graph</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">integer representing size of graph (in bytes)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-utils" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../contact.html" class="btn btn-neutral float-right" title="Contact Us" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="server.html" class="btn btn-neutral" title="server module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Talwalkar Lab
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

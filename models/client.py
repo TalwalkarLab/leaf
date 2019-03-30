@@ -50,10 +50,16 @@ class Client:
 
     @property
     def num_test_samples(self):
+        """Number of test samples for this client.
+
+        Return:
+            int: Number of test samples for this client
+        """
         return len(self.eval_data['y'])
 
     @property
     def model(self):
+        """Returns this client reference to model being trained"""
         return self._model
 
     @model.setter
