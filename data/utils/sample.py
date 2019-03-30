@@ -50,6 +50,20 @@ subdir = os.path.join(data_dir, 'all_data')
 files = os.listdir(subdir)
 files = [f for f in files if f.endswith('.json')]
 
+rng_seed = (args.seed if (args.seed is not None and args.seed >= 0) else int(time.time()))
+print ("Using seed {}".format(rng_seed))
+rng = random.Random(rng_seed)
+print (os.environ.get('LEAF_DATA_META_DIR'))
+if os.environ.get('LEAF_DATA_META_DIR') is not None:
+    seed_fname = os.path.join(os.environ.get('LEAF_DATA_META_DIR'), SEED_FILES['sampling'])
+    with open(seed_fname, 'w+') as f:
+        f.write("# sampling_seed used by sampling script - supply as "
+                "--smplseed to preprocess.sh or --seed to utils/sample.py\n")
+        f.write(str(rng_seed))
+    print ("- random seed written out to {file}".format(file=seed_fname))
+else:
+    print ("- using random seed '{seed}' for sampling".format(seed=rng_seed))
+
 new_user_count = 0 # for iid case
 for f in files:
     file_dir = os.path.join(subdir, f)
