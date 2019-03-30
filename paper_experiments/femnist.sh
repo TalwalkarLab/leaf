@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 output_dir="${1:-'./baseline'}"
-output_dir=`realpath ${output_dir}`
 
 split_seed="1549786796"
 sampling_seed="1549786595"
@@ -54,6 +53,7 @@ function run_minibatch() {
 
 
 ##################### Script #################################
+pushd ../
 
 # Check that data and models are available
 if [ ! -d 'data/' -o ! -d 'models/' ]; then
@@ -70,12 +70,13 @@ if [ ! -d 'data/femnist/data/train' ]; then
 	echo "Couldn't find FEMNIST data - running data preprocessing script"
 	pushd data/femnist/
 		rm -rf meta/ data/all_data data/test data/train data/rem_user_data data/intermediate
-		./preprocess.sh -s iid --sf 0.05 -k 0 -t sample --smplseed ${sampling_seed} --spltseed ${split_seed}
+		./preprocess.sh -s niid --sf 0.05 -k 100 -t sample --smplseed ${sampling_seed} --spltseed ${split_seed}
 	popd
 fi
 
 # Create output_dir
 mkdir -p ${output_dir}
+output_dir=`realpath ${output_dir}`
 echo "Storing results in directory ${output_dir} (please invoke this script as: ${0} <dirname> to change)"
 
 # Run minibatch SGD experiments
@@ -93,3 +94,5 @@ for val_pair in "${fedavg_vals[@]}"; do
 	echo "Running FedAvg experiment with ${num_epochs} local epochs and ${clients_per_round} clients"
 	run_fedavg "${clients_per_round}" "${num_epochs}"
 done
+
+popd
