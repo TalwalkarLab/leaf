@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 OUTPUT_DIR=${1:-"./baseline"}
-OUTPUT_DIR=`realpath ${OUTPUT_DIR}`
 
 # Each value is (k, seed) pair
 declare -a k_vals=( "100 1549774894" "30 1549775083" "10 1549775860" "3 1549780473" )
@@ -13,8 +12,8 @@ function get_k_data() {
 	split_seed="${2}"
 
 	pushd data/sent140/
-		rm -rf meta/ data/all_data data/test data/train data/rem_user_data data/intermediate
-		./preprocess.sh --sf 0.5 -k ${keep_clients} -t sample --spltseed ${split_seed}
+		rm -rf meta/ data/
+		./preprocess.sh --sf 0.5 -k ${keep_clients} -s niid -t sample --spltseed ${split_seed}
 	popd
 }
 
@@ -41,6 +40,7 @@ function run_k() {
 }
 
 ###################### Script ########################################
+pushd ../
 
 if [ ! -d "data/" -o ! -d "models/" ]; then
 	echo "Couldn't find data/  and/or models/ directories - please run this script from the root of the LEAF repo"
@@ -53,6 +53,7 @@ if [ ! -d 'data/sent140/preprocess' ]; then
 fi
 
 mkdir -p ${OUTPUT_DIR}
+OUTPUT_DIR=`realpath ${OUTPUT_DIR}`
 echo "Writing output files to ${OUTPUT_DIR}"
 
 # Check that GloVe embeddings are available; else, download them
@@ -68,3 +69,5 @@ for val_pair in "${k_vals[@]}"; do
 	run_k "${k_val}" "${seed}"
 	echo "Completed k=${k_val}"
 done
+
+popd
