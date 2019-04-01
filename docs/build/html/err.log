@@ -1,0 +1,77 @@
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET / HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/customheader.css HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/css/theme.css HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/pygments.css HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/jquery.js HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/documentation_options.js HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/js/modernizr.min.js HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/underscore.js HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/doctools.js HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/language_data.js HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/js/theme.js HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/fonts/Lato/lato-regular.woff2 HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/fonts/RobotoSlab/roboto-slab-v7-regular.woff2 HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/fonts/RobotoSlab/roboto-slab-v7-bold.woff2 HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/fonts/fontawesome-webfont.woff2?v=4.7.0 HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:33] "GET /_static/fonts/Lato/lato-bold.woff2 HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:34] code 404, message File not found
+128.237.166.187 - - [30/Mar/2019 00:20:34] "GET /favicon.ico HTTP/1.1" 404 -
+128.237.166.187 - - [30/Mar/2019 00:20:34] "GET /install/get_leaf.html HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:37] "GET /tutorials/index.html HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:43] "GET /_static/fonts/Lato/lato-italic.ttf HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:43] "GET /tutorials/sent140-md.html HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:43] "GET /_static/fonts/Lato/lato-italic.woff2 HTTP/1.1" 200 -
+----------------------------------------
+Exception happened during processing of request from ('128.237.166.187', 41134)
+Traceback (most recent call last):
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 317, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 348, in process_request
+    self.finish_request(request, client_address)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 696, in __init__
+    self.handle()
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/http/server.py", line 418, in handle
+    self.handle_one_request()
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/http/server.py", line 406, in handle_one_request
+    method()
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/http/server.py", line 639, in do_GET
+    self.copyfile(f, self.wfile)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/http/server.py", line 800, in copyfile
+    shutil.copyfileobj(source, outputfile)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/shutil.py", line 82, in copyfileobj
+    fdst.write(buf)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 775, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+128.237.166.187 - - [30/Mar/2019 00:20:43] "GET /tutorials/sent140-md.html HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:43] "GET /_static/fonts/Lato/lato-italic.woff HTTP/1.1" 200 -
+----------------------------------------
+Exception happened during processing of request from ('128.237.166.187', 41138)
+Traceback (most recent call last):
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 317, in _handle_request_noblock
+    self.process_request(request, client_address)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 348, in process_request
+    self.finish_request(request, client_address)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 696, in __init__
+    self.handle()
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/http/server.py", line 418, in handle
+    self.handle_one_request()
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/http/server.py", line 406, in handle_one_request
+    method()
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/http/server.py", line 639, in do_GET
+    self.copyfile(f, self.wfile)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/http/server.py", line 800, in copyfile
+    shutil.copyfileobj(source, outputfile)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/shutil.py", line 82, in copyfileobj
+    fdst.write(buf)
+  File "/home/ubuntu/anaconda/envs/server/lib/python3.6/socketserver.py", line 775, in write
+    self._sock.sendall(b)
+BrokenPipeError: [Errno 32] Broken pipe
+----------------------------------------
+128.237.166.187 - - [30/Mar/2019 00:20:48] "GET /_images/leaf_rep_sent140.png HTTP/1.1" 200 -
+128.237.166.187 - - [30/Mar/2019 00:20:48] "GET /tutorials/shakespeare-md.html HTTP/1.1" 200 -

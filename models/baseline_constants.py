@@ -1,6 +1,9 @@
-SIM_TIMES = ['small', 'medium', 'large']
+"""Configuration file for common models/experiments"""
 
-MAIN_PARAMS = { # (tot_num_rounds, eval_every_num_rounds, clients_per_round)
+SIM_TIMES = ['small', 'medium', 'large']
+"""list: Common sets of configuration for simulations"""
+
+MAIN_PARAMS = { 
     'sent140': {
         'small': (10, 2, 2),
         'medium': (16, 2, 2),
@@ -17,6 +20,8 @@ MAIN_PARAMS = { # (tot_num_rounds, eval_every_num_rounds, clients_per_round)
         'large': (20, 1, 2)
         }
 }
+"""dict: Specifies execution parameters (tot_num_rounds, eval_every_num_rounds, clients_per_round)"""
+
 MODEL_PARAMS = {
     'sent140.bag_dnn': (0.0003, 2), # lr, num_classes
     'sent140.stacked_lstm': (0.0003, 25, 2, 100), # lr, seq_len, num_classes, num_hidden
@@ -24,6 +29,7 @@ MODEL_PARAMS = {
     'femnist.cnn': (0.0003, 62), # lr, num_classes
     'shakespeare.stacked_lstm': (0.0003, 80, 53, 256) # lr, seq_len, num_classes, num_hidden
 }
+"""dict: Model specific parameter specification"""
 
 ACCURACY_KEY = 'accuracy'
 BYTES_WRITTEN_KEY = 'bytes_written'
