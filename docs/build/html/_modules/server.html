@@ -182,13 +182,8 @@
 <span class="sd">            list of (num_train_samples, num_test_samples)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">num_clients</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">num_clients</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_clients</span><span class="p">))</span>
-        <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">possible_clients</span><span class="p">)]</span>
-        <span class="n">chosen_indices</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">num_clients</span><span class="p">)</span>
-        <span class="n">clients_chosen</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">chosen_indices</span><span class="p">:</span>
-            <span class="n">clients_chosen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">possible_clients</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selected_clients</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">possible_clients</span><span class="p">,</span> <span class="n">num_clients</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">selected_clients</span> <span class="o">=</span> <span class="n">clients_chosen</span>
         <span class="k">return</span> <span class="p">[(</span><span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">train_data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">eval_data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]))</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_clients</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="Server.train_model"><a class="viewcode-back" href="../autodoc/server.html#server.Server.train_model">[docs]</a>    <span class="k">def</span> <span class="nf">train_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">minibatch</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clients</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -222,10 +217,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">send_to</span><span class="p">([</span><span class="n">c</span><span class="p">])</span>
             <span class="n">sys_metrics</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="n">BYTES_READ_KEY</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">size</span>
 
-            <span class="n">ret_vals</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">minibatch</span><span class="p">)</span>
-            <span class="n">comp</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">update</span> <span class="o">=</span> <span class="n">ret_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ret_vals</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ret_vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ret_vals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">sys_metrics</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="s1">&#39;train_loss&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret_vals</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">comp</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">,</span> <span class="n">update</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">num_epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">,</span> <span class="n">minibatch</span><span class="p">)</span>
             <span class="n">sys_metrics</span><span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">id</span><span class="p">][</span><span class="n">LOCAL_COMPUTATIONS_KEY</span><span class="p">]</span> <span class="o">=</span> <span class="n">comp</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">updates</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">update</span><span class="p">))</span>
@@ -307,7 +299,6 @@
         <script type="text/javascript" src="../_static/jquery.js"></script>
         <script type="text/javascript" src="../_static/underscore.js"></script>
         <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
     
 
   

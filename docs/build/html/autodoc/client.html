@@ -102,7 +102,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Additional Information</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../contact.html">Contact Us</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contact.html">Contact</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../citations.html">Citing LEAF</a></li>
 </ul>
 
@@ -179,12 +179,24 @@
 <dl class="attribute">
 <dt id="client.Client.model">
 <code class="descname">model</code><a class="headerlink" href="#client.Client.model" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Returns this client reference to model being trained</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="client.Client.num_test_samples">
 <code class="descname">num_test_samples</code><a class="headerlink" href="#client.Client.num_test_samples" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Number of test samples for this client.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of test samples for this client</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)">int</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="method">
 <dt id="client.Client.test">
@@ -209,7 +221,7 @@
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>num_epochs</strong> – Number of epochs to train.</li>
+<li><strong>num_epochs</strong> – Number of epochs to train. Unsupported if minibatch is provided (minibatch has only 1 epoch)</li>
 <li><strong>batch_size</strong> – Size of training batches.</li>
 <li><strong>minibatch</strong> – fraction of client’s data to apply minibatch sgd,
 None to use FedAvg</li>
@@ -278,7 +290,6 @@ update_size: number of bytes in update</p>
         <script type="text/javascript" src="../_static/jquery.js"></script>
         <script type="text/javascript" src="../_static/underscore.js"></script>
         <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
     
 
   

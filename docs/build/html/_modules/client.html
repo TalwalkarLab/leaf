@@ -173,7 +173,7 @@
         <span class="sd">&quot;&quot;&quot;Trains on self.model using the client&#39;s train_data.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            num_epochs: Number of epochs to train.</span>
+<span class="sd">            num_epochs: Number of epochs to train. Unsupported if minibatch is provided (minibatch has only 1 epoch)</span>
 <span class="sd">            batch_size: Size of training batches.</span>
 <span class="sd">            minibatch: fraction of client&#39;s data to apply minibatch sgd,</span>
 <span class="sd">                None to use FedAvg</span>
@@ -185,21 +185,17 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">minibatch</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span>
-            <span class="n">ret_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
+            <span class="n">comp</span><span class="p">,</span> <span class="n">update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">frac</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">minibatch</span><span class="p">)</span>
             <span class="n">num_data</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">frac</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">])))</span>
             <span class="n">xs</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">train_data</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">])),</span> <span class="n">num_data</span><span class="p">))</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">xs</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">ys</span><span class="p">}</span>
-            <span class="n">ret_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">num_data</span><span class="p">)</span>
 
-        <span class="n">comp</span><span class="p">,</span> <span class="n">update</span> <span class="o">=</span> <span class="n">ret_vals</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ret_vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># Minibatch trains for only 1 epoch - multiple local epochs don&#39;t make sense!</span>
+            <span class="n">num_epochs</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">comp</span><span class="p">,</span> <span class="n">update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">num_epochs</span><span class="p">,</span> <span class="n">num_data</span><span class="p">)</span>
         <span class="n">num_train_samples</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ret_vals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">train_loss</span> <span class="o">=</span> <span class="n">ret_vals</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">comp</span><span class="p">,</span> <span class="n">num_train_samples</span><span class="p">,</span> <span class="n">update</span><span class="p">,</span> <span class="n">train_loss</span>
-
         <span class="k">return</span> <span class="n">comp</span><span class="p">,</span> <span class="n">num_train_samples</span><span class="p">,</span> <span class="n">update</span></div>
 
 <div class="viewcode-block" id="Client.test"><a class="viewcode-back" href="../autodoc/client.html#client.Client.test">[docs]</a>    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
@@ -212,10 +208,16 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">num_test_samples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of test samples for this client.</span>
+
+<span class="sd">        Return:</span>
+<span class="sd">            int: Number of test samples for this client</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eval_data</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">])</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns this client reference to model being trained&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span>
 
     <span class="nd">@model</span><span class="o">.</span><span class="n">setter</span>
@@ -260,7 +262,6 @@
         <script type="text/javascript" src="../_static/jquery.js"></script>
         <script type="text/javascript" src="../_static/underscore.js"></script>
         <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
     
 
   

@@ -163,6 +163,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
 
 <span class="kn">import</span> <span class="nn">metrics.writer</span> <span class="k">as</span> <span class="nn">metrics_writer</span>
@@ -182,6 +183,10 @@
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../autodoc/main.html#main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
 
     <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="c1"># Set the random seed if provided (affects client sampling, and batching)</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="n">model_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.py&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">model_path</span><span class="p">):</span>
@@ -285,14 +290,22 @@
                     <span class="n">help</span><span class="o">=</span><span class="s1">&#39;batch size when clients train on data;&#39;</span><span class="p">,</span>
                     <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--minibatch&#39;</span><span class="p">,</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--seed&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;seed for random client sampling and batch splitting&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># Minibatch doesn&#39;t support num_epochs, so make them mutually exclusive</span>
+    <span class="n">epoch_capability_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
+    <span class="n">epoch_capability_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--minibatch&#39;</span><span class="p">,</span>
                     <span class="n">help</span><span class="o">=</span><span class="s1">&#39;None for FedAvg, else fraction;&#39;</span><span class="p">,</span>
                     <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--num_epochs&#39;</span><span class="p">,</span>
+    <span class="n">epoch_capability_group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--num_epochs&#39;</span><span class="p">,</span>
                     <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of epochs when clients train on data;&#39;</span><span class="p">,</span>
                     <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
     <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-t&#39;</span><span class="p">,</span>
                     <span class="n">help</span><span class="o">=</span><span class="s1">&#39;simulation time: small, medium, or large;&#39;</span><span class="p">,</span>
                     <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
@@ -392,7 +405,6 @@
         <script type="text/javascript" src="../_static/jquery.js"></script>
         <script type="text/javascript" src="../_static/underscore.js"></script>
         <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
     
 
   

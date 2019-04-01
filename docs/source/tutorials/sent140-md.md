@@ -40,7 +40,7 @@ and we shall discard all users with less than 10 tweets. The following command s
 how this can be accomplished (the `--spltseed` flag in this case is to enable reproducible generation of the dataset)
 
 ```bash
-leaf/data/sent140/ $> ./preprocess.sh --sf 0.5 -t sample --tf 0.8 -k 3 --spltseed 1549775860
+leaf/data/sent140/ $> ./preprocess.sh --sf 0.5 -t sample -s niid --tf 0.8 -k 3 --spltseed 1549775860
 ```
 
 After running this script, the `data/sent140/data` directory should contain `train/` and `test/` directories.

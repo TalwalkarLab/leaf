@@ -34,7 +34,7 @@ For our experiment, as a first step, we shall use 5% of the dataset in an 80-20 
 how this can be accomplished (the `--spltseed` and `--smplseed` flags in this case is to enable reproducible generation of the dataset)
 
 ```bash
-leaf/data/femnist/ $> ./preprocess.sh -s iid --sf 0.05 -k 0 -t sample --smplseed 1549786595 --spltseed 1549786796
+leaf/data/femnist/ $> ./preprocess.sh -s niid --sf 0.05 -k 0 -t sample --smplseed 1549786595 --spltseed 1549786796
 ```
 
 After running this script, the `data/femnist/data` directory should contain `train/` and `test/` directories.

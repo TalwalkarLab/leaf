@@ -87,7 +87,7 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">General Examples</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index.html#id1">Twitter Sentiment Analysis</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html#id2">Systems Resource Requirement Analyses</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#id2">Systems Resource Requirement Analyses [FEMNIST]</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Experiment Setup and Execution</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#quickstart-script">Quickstart script</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#dataset-fetching-and-pre-processing">Dataset fetching and pre-processing</a></li>
@@ -201,7 +201,7 @@ Additionally, these scripts are also capable of subsampling from the dataset, an
 into training and testing sets.</p>
 <p>For our experiment, as a first step, we shall use 5% of the dataset in an 80-20 train/test split. The following command shows
 how this can be accomplished (the <code class="docutils literal notranslate"><span class="pre">--spltseed</span></code> and <code class="docutils literal notranslate"><span class="pre">--smplseed</span></code> flags in this case is to enable reproducible generation of the dataset)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>leaf/data/femnist/ $&gt; ./preprocess.sh -s iid --sf <span class="m">0</span>.05 -k <span class="m">0</span> -t sample --smplseed <span class="m">1549786595</span> --spltseed <span class="m">1549786796</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>leaf/data/femnist/ $&gt; ./preprocess.sh -s niid --sf <span class="m">0</span>.05 -k <span class="m">0</span> -t sample --smplseed <span class="m">1549786595</span> --spltseed <span class="m">1549786796</span>
 </pre></div>
 </div>
 <p>After running this script, the <code class="docutils literal notranslate"><span class="pre">data/femnist/data</span></code> directory should contain <code class="docutils literal notranslate"><span class="pre">train/</span></code> and <code class="docutils literal notranslate"><span class="pre">test/</span></code> directories.</p>
@@ -278,7 +278,6 @@ dimensions, and it is thus important to consider both aspects depending on the p
         <script type="text/javascript" src="../_static/jquery.js"></script>
         <script type="text/javascript" src="../_static/underscore.js"></script>
         <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
     
 
   

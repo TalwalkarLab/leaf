@@ -27,7 +27,7 @@ on model accuracy when training using `FedAvg` algorithm.
   
      shakespeare-md
   
-`Systems Resource Requirement Analyses <femnist-md.html>`_
+`Systems Resource Requirement Analyses [FEMNIST] <femnist-md.html>`_
 -----------------------------------------------------------
 
 Investigate the systems budget (in terms of compute [number of FLOPs]

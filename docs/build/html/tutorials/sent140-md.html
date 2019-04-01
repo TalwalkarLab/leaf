@@ -99,7 +99,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#more-information">More Information</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#id2">Systems Resource Requirement Analyses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#id2">Systems Resource Requirement Analyses [FEMNIST]</a></li>
 </ul>
 </li>
 </ul>
@@ -210,7 +210,7 @@ into training and testing sets.</p>
 <p>For our experiment, as a first step, we shall use 50% of the dataset in an 80-20 train/test split,
 and we shall discard all users with less than 10 tweets. The following command shows
 how this can be accomplished (the <code class="docutils literal notranslate"><span class="pre">--spltseed</span></code> flag in this case is to enable reproducible generation of the dataset)</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>leaf/data/sent140/ $&gt; ./preprocess.sh --sf <span class="m">0</span>.5 -t sample --tf <span class="m">0</span>.8 -k <span class="m">3</span> --spltseed <span class="m">1549775860</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>leaf/data/sent140/ $&gt; ./preprocess.sh --sf <span class="m">0</span>.5 -t sample -s niid --tf <span class="m">0</span>.8 -k <span class="m">3</span> --spltseed <span class="m">1549775860</span>
 </pre></div>
 </div>
 <p>After running this script, the <code class="docutils literal notranslate"><span class="pre">data/sent140/data</span></code> directory should contain <code class="docutils literal notranslate"><span class="pre">train/</span></code> and <code class="docutils literal notranslate"><span class="pre">test/</span></code> directories.</p>
@@ -286,7 +286,6 @@ we execute the following command:</p>
         <script type="text/javascript" src="../_static/jquery.js"></script>
         <script type="text/javascript" src="../_static/underscore.js"></script>
         <script type="text/javascript" src="../_static/doctools.js"></script>
-        <script type="text/javascript" src="../_static/language_data.js"></script>
     
 
   
