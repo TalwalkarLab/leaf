@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>metrics.writer &mdash; LEAF 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/customheader.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> LEAF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/get_leaf.html">Installation and Contribution</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">General Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autodoc/modules.html">models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citations.html">Citing LEAF</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LEAF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>metrics.writer</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for metrics.writer</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Writes the given metrics in a csv.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">models_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">models_dir</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">baseline_constants</span> <span class="k">import</span> <span class="n">CLIENT_ID_KEY</span><span class="p">,</span> <span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">NUM_SAMPLES_KEY</span>
+
+
+<span class="n">COLUMN_NAMES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">CLIENT_ID_KEY</span><span class="p">,</span> <span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="s1">&#39;hierarchy&#39;</span><span class="p">,</span> <span class="n">NUM_SAMPLES_KEY</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="print_metrics"><a class="viewcode-back" href="../../autodoc/metrics.html#metrics.writer.print_metrics">[docs]</a><span class="k">def</span> <span class="nf">print_metrics</span><span class="p">(</span>
+        <span class="n">round_number</span><span class="p">,</span>
+        <span class="n">client_ids</span><span class="p">,</span>
+        <span class="n">metrics</span><span class="p">,</span>
+        <span class="n">hierarchies</span><span class="p">,</span>
+        <span class="n">num_samples</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Prints or appends the given metrics in a csv.</span>
+
+<span class="sd">    The resulting dataframe is of the form:</span>
+<span class="sd">        client_id, round_number, hierarchy, num_samples, metric1, metric2</span>
+<span class="sd">        twebbstack, 0, , 18, 0.5, 0.89</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        round_number: Number of the round the metrics correspond to. If</span>
+<span class="sd">            0, then the file in path is overwritten. If not 0, we append to</span>
+<span class="sd">            that file.</span>
+<span class="sd">        client_ids: Ids of the clients. Not all ids must be in the following</span>
+<span class="sd">            dicts.</span>
+<span class="sd">        metrics: Dict keyed by client id. Each element is a dict of metrics</span>
+<span class="sd">            for that client in the specified round. The dicts for all clients</span>
+<span class="sd">            are expected to have the same set of keys.</span>
+<span class="sd">        hierarchies: Dict keyed by client id. Each element is a list of hierarchies</span>
+<span class="sd">            to which the client belongs.</span>
+<span class="sd">        num_samples: Dict keyed by client id. Each element is the number of test</span>
+<span class="sd">            samples for the client.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">COLUMN_NAMES</span> <span class="o">+</span> <span class="n">get_metrics_names</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+    <span class="n">client_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">client_ids</span><span class="p">):</span>
+        <span class="n">current_client</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;client_id&#39;</span><span class="p">:</span> <span class="n">c_id</span><span class="p">,</span>
+            <span class="s1">&#39;round_number&#39;</span><span class="p">:</span> <span class="n">round_number</span><span class="p">,</span>
+            <span class="s1">&#39;hierarchy&#39;</span><span class="p">:</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">hierarchies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c_id</span><span class="p">,</span> <span class="p">[])),</span>
+            <span class="s1">&#39;num_samples&#39;</span><span class="p">:</span> <span class="n">num_samples</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c_id</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="p">}</span>
+
+        <span class="n">current_metrics</span> <span class="o">=</span> <span class="n">metrics</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c_id</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">metric_value</span> <span class="ow">in</span> <span class="n">current_metrics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">current_client</span><span class="p">[</span><span class="n">metric</span><span class="p">]</span> <span class="o">=</span> <span class="n">metric_value</span>
+        <span class="n">client_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">client_data</span><span class="p">)]</span> <span class="o">=</span> <span class="n">current_client</span>
+
+    <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;w&#39;</span> <span class="k">if</span> <span class="n">round_number</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;a&#39;</span>
+    <span class="n">print_dataframe</span><span class="p">(</span><span class="n">client_data</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="print_dataframe"><a class="viewcode-back" href="../../autodoc/metrics.html#metrics.writer.print_dataframe">[docs]</a><span class="k">def</span> <span class="nf">print_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Writes the given dataframe in path as a csv&quot;&quot;&quot;</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;w&#39;</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_metrics_names"><a class="viewcode-back" href="../../autodoc/metrics.html#metrics.writer.get_metrics_names">[docs]</a><span class="k">def</span> <span class="nf">get_metrics_names</span><span class="p">(</span><span class="n">metrics</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets the names of the metrics.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        metrics: Dict keyed by client id. Each element is a dict of metrics</span>
+<span class="sd">            for that client in the specified round. The dicts for all clients</span>
+<span class="sd">            are expected to have the same set of keys.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">metrics_dict</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">metrics_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Talwalkar Lab
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

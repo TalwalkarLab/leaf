@@ -1,0 +1,503 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>metrics.visualization_utils &mdash; LEAF 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/customheader.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> LEAF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install/get_leaf.html">Installation and Contribution</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/index.html">General Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autodoc/modules.html">models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citations.html">Citing LEAF</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">LEAF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>metrics.visualization_utils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for metrics.visualization_utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Helper to visualize metrics.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">decimal</span> <span class="k">import</span> <span class="n">Decimal</span>
+
+<span class="n">models_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)))</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">models_dir</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">baseline_constants</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">ACCURACY_KEY</span><span class="p">,</span>
+    <span class="n">BYTES_READ_KEY</span><span class="p">,</span>
+    <span class="n">BYTES_WRITTEN_KEY</span><span class="p">,</span>
+    <span class="n">CLIENT_ID_KEY</span><span class="p">,</span>
+    <span class="n">LOCAL_COMPUTATIONS_KEY</span><span class="p">,</span>
+    <span class="n">NUM_ROUND_KEY</span><span class="p">,</span>
+    <span class="n">NUM_SAMPLES_KEY</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../../autodoc/metrics.html#metrics.visualization_utils.load_data">[docs]</a><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">stat_metrics_file</span><span class="o">=</span><span class="s1">&#39;stat_metrics.csv&#39;</span><span class="p">,</span> <span class="n">sys_metrics_file</span><span class="o">=</span><span class="s1">&#39;sys_metrics.csv&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Loads the data from the given stat_metric and sys_metric files.&quot;&quot;&quot;</span>
+    <span class="n">stat_metrics</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">stat_metrics_file</span><span class="p">)</span> <span class="k">if</span> <span class="n">stat_metrics_file</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">sys_metrics</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">sys_metrics_file</span><span class="p">)</span> <span class="k">if</span> <span class="n">sys_metrics_file</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">stat_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stat_metrics</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sys_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sys_metrics</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">stat_metrics</span><span class="p">,</span> <span class="n">sys_metrics</span></div>
+
+
+<span class="k">def</span> <span class="nf">_set_plot_properties</span><span class="p">(</span><span class="n">properties</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sets some plt properties.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;xlim&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;xlim&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="s1">&#39;ylim&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;ylim&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="s1">&#39;xlabel&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;xlabel&#39;</span><span class="p">])</span>
+    <span class="k">if</span> <span class="s1">&#39;ylabel&#39;</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">properties</span><span class="p">[</span><span class="s1">&#39;ylabel&#39;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="plot_accuracy_vs_round_number"><a class="viewcode-back" href="../../autodoc/metrics.html#metrics.visualization_utils.plot_accuracy_vs_round_number">[docs]</a><span class="k">def</span> <span class="nf">plot_accuracy_vs_round_number</span><span class="p">(</span><span class="n">stat_metrics</span><span class="p">,</span> <span class="n">weighted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plot_stds</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">title_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots the clients&#39; average test accuracy vs. the round number.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stat_metrics: pd.DataFrame as written by writer.py.</span>
+<span class="sd">        weighted: Whether the average across clients should be weighted by number of</span>
+<span class="sd">            test samples.</span>
+<span class="sd">        plot_stds: Whether to plot error bars corresponding to the std between users.</span>
+<span class="sd">        figsize: Size of the plot as specified by plt.figure().</span>
+<span class="sd">        title_fontsize: Font size for the plot&#39;s title.</span>
+<span class="sd">        kwargs: Arguments to be passed to _set_plot_properties.&quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+    <span class="n">title_weighted</span> <span class="o">=</span> <span class="s1">&#39;Weighted&#39;</span> <span class="k">if</span> <span class="n">weighted</span> <span class="k">else</span> <span class="s1">&#39;Unweighted&#39;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Accuracy vs Round Number (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">title_weighted</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">title_fontsize</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">weighted</span><span class="p">:</span>
+        <span class="n">accuracies</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">NUM_ROUND_KEY</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_weighted_mean</span><span class="p">,</span> <span class="n">ACCURACY_KEY</span><span class="p">,</span> <span class="n">NUM_SAMPLES_KEY</span><span class="p">)</span>
+        <span class="n">accuracies</span> <span class="o">=</span> <span class="n">accuracies</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">ACCURACY_KEY</span><span class="p">)</span>
+
+        <span class="n">stds</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">NUM_ROUND_KEY</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_weighted_std</span><span class="p">,</span> <span class="n">ACCURACY_KEY</span><span class="p">,</span> <span class="n">NUM_SAMPLES_KEY</span><span class="p">)</span>
+        <span class="n">stds</span> <span class="o">=</span> <span class="n">stds</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">ACCURACY_KEY</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">accuracies</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">stds</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">plot_stds</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">accuracies</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">],</span> <span class="n">accuracies</span><span class="p">[</span><span class="n">ACCURACY_KEY</span><span class="p">],</span> <span class="n">stds</span><span class="p">[</span><span class="n">ACCURACY_KEY</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">accuracies</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">],</span> <span class="n">accuracies</span><span class="p">[</span><span class="n">ACCURACY_KEY</span><span class="p">])</span>
+
+    <span class="n">percentile_10</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">percentile_90</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.9</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">percentile_10</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">],</span> <span class="n">percentile_10</span><span class="p">[</span><span class="n">ACCURACY_KEY</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">percentile_90</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">],</span> <span class="n">percentile_90</span><span class="p">[</span><span class="n">ACCURACY_KEY</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Mean&#39;</span><span class="p">,</span> <span class="s1">&#39;10th percentile&#39;</span><span class="p">,</span> <span class="s1">&#39;90th percentile&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Round Number&#39;</span><span class="p">)</span>
+    <span class="n">_set_plot_properties</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<span class="k">def</span> <span class="nf">_weighted_mean</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">weight_name</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">weight_name</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+
+<span class="k">def</span> <span class="nf">_weighted_std</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">weight_name</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">metric_name</span><span class="p">]</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">weight_name</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">weigthed_mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="p">((</span><span class="n">d</span> <span class="o">-</span> <span class="n">weigthed_mean</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">w</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+
+<div class="viewcode-block" id="plot_accuracy_vs_round_number_per_client"><a class="viewcode-back" href="../../autodoc/metrics.html#metrics.visualization_utils.plot_accuracy_vs_round_number_per_client">[docs]</a><span class="k">def</span> <span class="nf">plot_accuracy_vs_round_number_per_client</span><span class="p">(</span>
+        <span class="n">stat_metrics</span><span class="p">,</span> <span class="n">sys_metrics</span><span class="p">,</span> <span class="n">max_num_clients</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="n">title_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">max_name_len</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots the clients&#39; test accuracy vs. the round number.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stat_metrics: pd.DataFrame as written by writer.py.</span>
+<span class="sd">        sys_metrics: pd.DataFrame as written by writer.py. Allows us to know which client actually performed training</span>
+<span class="sd">            in each round. If None, then no indication is given of when was each client trained.</span>
+<span class="sd">        max_num_clients: Maximum number of clients to plot.</span>
+<span class="sd">        figsize: Size of the plot as specified by plt.figure().</span>
+<span class="sd">        title_fontsize: Font size for the plot&#39;s title.</span>
+<span class="sd">        max_name_len: Maximum length for a client&#39;s id.</span>
+<span class="sd">        kwargs: Arguments to be passed to _set_plot_properties.&quot;&quot;&quot;</span>
+    <span class="c1"># Plot accuracies per client.</span>
+    <span class="n">clients</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[:</span><span class="n">max_num_clients</span><span class="p">]</span>
+    <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;jet_r&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">clients</span><span class="p">):</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">clients</span><span class="p">))</span>
+        <span class="n">c_accuracies</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">stat_metrics</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">c_accuracies</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">],</span> <span class="n">c_accuracies</span><span class="p">[</span><span class="n">ACCURACY_KEY</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Accuracy vs Round Number (Per Client)&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">title_fontsize</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;(Dots indicate that client was trained at that round)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Round Number&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Accuracy&#39;</span><span class="p">)</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="p">[[</span><span class="n">CLIENT_ID_KEY</span><span class="p">,</span> <span class="n">NUM_SAMPLES_KEY</span><span class="p">]]</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">()</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">labels</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">labels</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">clients</span><span class="p">)]</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">][:</span><span class="n">max_name_len</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="n">NUM_SAMPLES_KEY</span><span class="p">])</span>
+              <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">labels</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;client id, num_samples&#39;</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Plot moments in which the clients were actually used for training.</span>
+    <span class="c1"># To do this, we need the system metrics (to know which client actually performed training in each round).</span>
+    <span class="k">if</span> <span class="n">sys_metrics</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">clients</span><span class="p">[:</span><span class="n">max_num_clients</span><span class="p">]):</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">cmap</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">clients</span><span class="p">))</span>
+            <span class="n">c_accuracies</span> <span class="o">=</span> <span class="n">stat_metrics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">stat_metrics</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span>
+            <span class="n">c_computation</span> <span class="o">=</span> <span class="n">sys_metrics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sys_metrics</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span>
+            <span class="n">c_join</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">c_accuracies</span><span class="p">,</span> <span class="n">c_computation</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">c_join</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                    <span class="n">c_join</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">],</span>
+                    <span class="n">c_join</span><span class="p">[</span><span class="n">ACCURACY_KEY</span><span class="p">],</span>
+                    <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;None&#39;</span><span class="p">,</span>
+                    <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span>
+                    <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                    <span class="n">markersize</span><span class="o">=</span><span class="mi">18</span><span class="p">)</span>
+
+    <span class="n">_set_plot_properties</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="plot_bytes_written_and_read"><a class="viewcode-back" href="../../autodoc/metrics.html#metrics.visualization_utils.plot_bytes_written_and_read">[docs]</a><span class="k">def</span> <span class="nf">plot_bytes_written_and_read</span><span class="p">(</span><span class="n">sys_metrics</span><span class="p">,</span> <span class="n">rolling_window</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">title_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots the cumulative sum of the bytes written and read by the server.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sys_metrics: pd.DataFrame as written by writer.py.</span>
+<span class="sd">        rolling_window: Number of previous rounds to consider in the cumulative sum.</span>
+<span class="sd">        figsize: Size of the plot as specified by plt.figure().</span>
+<span class="sd">        title_fontsize: Font size for the plot&#39;s title.</span>
+<span class="sd">        kwargs: Arguments to be passed to _set_plot_properties.&quot;&quot;&quot;</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="n">server_metrics</span> <span class="o">=</span> <span class="n">sys_metrics</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">rounds</span> <span class="o">=</span> <span class="n">server_metrics</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">]</span>
+    <span class="n">server_metrics</span> <span class="o">=</span> <span class="n">server_metrics</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">rolling_window</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rounds</span><span class="p">,</span> <span class="n">server_metrics</span><span class="p">[</span><span class="s1">&#39;bytes_written&#39;</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rounds</span><span class="p">,</span> <span class="n">server_metrics</span><span class="p">[</span><span class="s1">&#39;bytes_read&#39;</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Bytes Written and Read by Server vs. Round Number&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="n">title_fontsize</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Round Number&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Bytes&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">([</span><span class="s1">&#39;Bytes Written&#39;</span><span class="p">,</span> <span class="s1">&#39;Bytes Read&#39;</span><span class="p">],</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
+    <span class="n">_set_plot_properties</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="plot_client_computations_vs_round_number"><a class="viewcode-back" href="../../autodoc/metrics.html#metrics.visualization_utils.plot_client_computations_vs_round_number">[docs]</a><span class="k">def</span> <span class="nf">plot_client_computations_vs_round_number</span><span class="p">(</span>
+        <span class="n">sys_metrics</span><span class="p">,</span>
+        <span class="n">aggregate_window</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">max_num_clients</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+        <span class="n">title_fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+        <span class="n">max_name_len</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">range_rounds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plots the clients&#39; local computations against round number.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sys_metrics: pd.DataFrame as written by writer.py.</span>
+<span class="sd">        aggregate_window: Number of rounds that are aggregated. e.g. If set to 20, then</span>
+<span class="sd">            rounds 0-19, 20-39, etc. will be added together.</span>
+<span class="sd">        max_num_clients: Maximum number of clients to plot.</span>
+<span class="sd">        figsize: Size of the plot as specified by plt.figure().</span>
+<span class="sd">        title_fontsize: Font size for the plot&#39;s title.</span>
+<span class="sd">        max_name_len: Maximum length for a client&#39;s id.</span>
+<span class="sd">        range_rounds: Tuple representing the range of rounds to be plotted. The rounds</span>
+<span class="sd">            are subsampled before aggregation. If None, all rounds are considered.&quot;&quot;&quot;</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+
+    <span class="n">num_rounds</span> <span class="o">=</span> <span class="n">sys_metrics</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">clients</span> <span class="o">=</span> <span class="n">sys_metrics</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()[:</span><span class="n">max_num_clients</span><span class="p">]</span>
+
+    <span class="n">comp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">matrix_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[:</span><span class="n">max_name_len</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">:</span>
+        <span class="n">client_rows</span> <span class="o">=</span> <span class="n">sys_metrics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sys_metrics</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span>
+        <span class="n">client_rows</span> <span class="o">=</span> <span class="n">client_rows</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">client_computations</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rounds</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rounds</span><span class="p">):</span>
+            <span class="n">computation_row</span> <span class="o">=</span> <span class="n">client_rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">client_rows</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">computation_row</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">client_computations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">computation_row</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">LOCAL_COMPUTATIONS_KEY</span><span class="p">]</span>
+        <span class="n">comp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">client_computations</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">range_rounds</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">range_rounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">range_rounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">range_rounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">range_rounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">range_rounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">comp_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="n">range_rounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">comp_matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">assert</span> <span class="n">range_rounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">range_rounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">aggregate_window</span>
+        <span class="n">new_comp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">comp_matrix</span><span class="p">)):</span>
+            <span class="n">new_comp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comp_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">range_rounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">range_rounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="n">comp_matrix</span> <span class="o">=</span> <span class="n">new_comp_matrix</span>
+
+    <span class="n">agg_comp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">c_comp_vals</span> <span class="ow">in</span> <span class="n">comp_matrix</span><span class="p">:</span>
+        <span class="n">num_rounds</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">c_comp_vals</span><span class="p">)</span>
+        <span class="n">agg_c_comp_vals</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rounds</span> <span class="o">//</span> <span class="n">aggregate_window</span><span class="p">):</span>
+            <span class="n">agg_c_comp_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">c_comp_vals</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="n">aggregate_window</span><span class="p">:(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">aggregate_window</span><span class="p">]))</span>
+        <span class="n">agg_comp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">agg_c_comp_vals</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span>
+        <span class="s1">&#39;Total Client Computations (FLOPs) vs. Round Number (x </span><span class="si">%d</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">aggregate_window</span><span class="p">,</span>
+        <span class="n">fontsize</span><span class="o">=</span><span class="n">title_fontsize</span><span class="p">)</span>
+    <span class="n">im</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">agg_comp_matrix</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matrix_keys</span><span class="p">)),</span> <span class="n">matrix_keys</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_longest_flops_path"><a class="viewcode-back" href="../../autodoc/metrics.html#metrics.visualization_utils.get_longest_flops_path">[docs]</a><span class="k">def</span> <span class="nf">get_longest_flops_path</span><span class="p">(</span><span class="n">sys_metrics</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Prints the largest amount of flops required to complete training.</span>
+
+<span class="sd">    To calculate this metric, we:</span>
+<span class="sd">        1. For each round, pick the client that required the largest amount</span>
+<span class="sd">            of local training.</span>
+<span class="sd">        2. Sum the FLOPS from the clients picked in step 1 across rounds.</span>
+
+<span class="sd">    TODO: This metric would make more sense with seconds instead of FLOPS.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sys_metrics: pd.DataFrame as written by writer.py.&quot;&quot;&quot;</span>
+    <span class="n">num_rounds</span> <span class="o">=</span> <span class="n">sys_metrics</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">clients</span> <span class="o">=</span> <span class="n">sys_metrics</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+
+    <span class="n">comp_matrix</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">clients</span><span class="p">:</span>
+        <span class="n">client_rows</span> <span class="o">=</span> <span class="n">sys_metrics</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">sys_metrics</span><span class="p">[</span><span class="n">CLIENT_ID_KEY</span><span class="p">]</span> <span class="o">==</span> <span class="n">c</span><span class="p">]</span>
+        <span class="n">client_rows</span> <span class="o">=</span> <span class="n">client_rows</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">NUM_ROUND_KEY</span><span class="p">,</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">client_computations</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rounds</span><span class="p">)]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rounds</span><span class="p">):</span>
+            <span class="n">computation_row</span> <span class="o">=</span> <span class="n">client_rows</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">client_rows</span><span class="p">[</span><span class="n">NUM_ROUND_KEY</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">computation_row</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">client_computations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">computation_row</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">LOCAL_COMPUTATIONS_KEY</span><span class="p">]</span>
+        <span class="n">comp_matrix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">client_computations</span><span class="p">)</span>
+
+    <span class="n">comp_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">comp_matrix</span><span class="p">)</span>
+    <span class="n">num_flops</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">comp_matrix</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%.2E</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">Decimal</span><span class="p">(</span><span class="n">num_flops</span><span class="o">.</span><span class="n">item</span><span class="p">())</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Talwalkar Lab
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

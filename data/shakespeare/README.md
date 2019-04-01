@@ -10,6 +10,8 @@
   - ```-t``` := 'user' to partition users into train-test groups, or 'sample' to partition each user's samples into train-test groups; default is 'sample'
   - ```--tf``` := fraction of data in training set, written as a decimal; default is 0.9
   - ```--raw``` := include users' raw text data in all_data.json
+  - ```--smplseed``` := seed to be used before random sampling of data
+  - ```--spltseed``` :=  seed to be used before random split of data
 
 i.e.
 - ```./preprocess.sh -s niid --sf 1.0 -k 0 -t sample -tf 0.8``` (full-sized dataset)<br/>

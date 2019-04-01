@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Experiment Setup and Execution &mdash; LEAF 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/customheader.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Experiment Setup and Execution" href="femnist-md.html" />
+    <link rel="prev" title="General Examples" href="index.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> LEAF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/get_leaf.html">Installation and Contribution</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">General Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#id1">Twitter Sentiment Analysis</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Experiment Setup and Execution</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#quickstart-script">Quickstart script</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pre-requisites">Pre-requisites</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#dataset-fetching-and-pre-processing">Dataset fetching and pre-processing</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#model-execution">Model Execution</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metrics-collection">Metrics Collection</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#results-and-analysis">Results and Analysis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#more-information">More Information</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#id2">Systems Resource Requirement Analyses</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autodoc/modules.html">models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citations.html">Citing LEAF</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">LEAF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">General Examples</a> &raquo;</li>
+        
+      <li>Experiment Setup and Execution</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/sent140-md.md.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1> Twitter Sentiment Analysis </h1><p>In this experiment, we reproduce the statistical analysis experiment conducted in the <a class="reference external" href="https://arxiv.org/abs/1812.01097">LEAF paper</a>. Specifically, we investigate the effect of varying the minimum number of
+samples per user (for training) on model accuracy when training using <code class="docutils literal notranslate"><span class="pre">FedAvg</span></code> algorithm,
+using the LEAF framework.</p>
+<p>For this example, we shall use Sentiment140 dataset (containing 1.6 million tweets),
+and we shall train a 2-layer LSTM model with cross-entropy loss, and using pre-trained GloVe embeddings.</p>
+<div class="section" id="experiment-setup-and-execution">
+<h1>Experiment Setup and Execution<a class="headerlink" href="#experiment-setup-and-execution" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="quickstart-script">
+<h2>Quickstart script<a class="headerlink" href="#quickstart-script" title="Permalink to this headline">¶</a></h2>
+<p>In the interest of ease of use, we provide a script for execution of the experiment
+for different min-sample counts, which may be executed as:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>leaf/paper_experiments $&gt; ./sent140.sh &lt;result-output-dir&gt;
+</pre></div>
+</div>
+<p>This script will execute the instructions provided below for min-sample counts of 3, 10, 30 and 100, reproducibly generating the data partitions and results observed by the authors during analysis.</p>
+</div>
+<div class="section" id="pre-requisites">
+<h2>Pre-requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this headline">¶</a></h2>
+<p>Since this experiment requires pre-trained word embeddings, we recommend running the
+<code class="docutils literal notranslate"><span class="pre">models/sent140/get_embs.sh</span></code> file, which fetches 300-dimensional pretrained GloVe vectors.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>leaf/models/sent140/ $&gt; ./get_embs.sh
+</pre></div>
+</div>
+<p>After extraction, this data is stored in <code class="docutils literal notranslate"><span class="pre">models/sent140/embs.json</span></code>.</p>
+</div>
+<div class="section" id="dataset-fetching-and-pre-processing">
+<h2>Dataset fetching and pre-processing<a class="headerlink" href="#dataset-fetching-and-pre-processing" title="Permalink to this headline">¶</a></h2>
+<p>LEAF contains powerful scripts for fetching and conversion of data into JSON format for easy utilization.
+Additionally, these scripts are also capable of subsampling from the dataset, and splitting the dataset
+into training and testing sets.</p>
+<p>For our experiment, as a first step, we shall use 50% of the dataset in an 80-20 train/test split,
+and we shall discard all users with less than 10 tweets. The following command shows
+how this can be accomplished (the <code class="docutils literal notranslate"><span class="pre">--spltseed</span></code> flag in this case is to enable reproducible generation of the dataset)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>leaf/data/sent140/ $&gt; ./preprocess.sh --sf <span class="m">0</span>.5 -t sample --tf <span class="m">0</span>.8 -k <span class="m">3</span> --spltseed <span class="m">1549775860</span>
+</pre></div>
+</div>
+<p>After running this script, the <code class="docutils literal notranslate"><span class="pre">data/sent140/data</span></code> directory should contain <code class="docutils literal notranslate"><span class="pre">train/</span></code> and <code class="docutils literal notranslate"><span class="pre">test/</span></code> directories.</p>
+</div>
+<div class="section" id="model-execution">
+<h2>Model Execution<a class="headerlink" href="#model-execution" title="Permalink to this headline">¶</a></h2>
+<p>Now that we have our data, we can execute our model! For this experiment, the model file is stored
+at <code class="docutils literal notranslate"><span class="pre">models/sent140/stacked_lstm.py</span></code>. In order train this model using <code class="docutils literal notranslate"><span class="pre">FedAvg</span></code> with 2 clients every round for 10 rounds,
+we execute the following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>leaf/models $&gt; python3 main.py -dataset sent140 -model stacked_lstm -lr <span class="m">0</span>.0003 --clients-per-round <span class="m">2</span> --num-rounds <span class="m">10</span>
+</pre></div>
+</div>
+<p>Alternatively, passing <code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">small</span></code> in place of the latter 2 flags provides the same functionality (as defined in <code class="docutils literal notranslate"><span class="pre">models/baseline_constants.py</span></code> file).</p>
+</div>
+<div class="section" id="metrics-collection">
+<h2>Metrics Collection<a class="headerlink" href="#metrics-collection" title="Permalink to this headline">¶</a></h2>
+<p>Executing the above command will write out system and statistical metrics to <code class="docutils literal notranslate"><span class="pre">leaf/models/metrics/stat_metrics.csv</span></code> and <code class="docutils literal notranslate"><span class="pre">leaf/models/metrics/sys_metrics.csv</span></code> - since these are overwritten for every run, we <strong>highly recommend</strong> storing the generated metrics files at a different location.</p>
+<p>To experiment with a different min-sample setting, re-run the preprocessing script with a different <code class="docutils literal notranslate"><span class="pre">-k</span></code> flag. The plots shown below can be generated using <code class="docutils literal notranslate"><span class="pre">plots.py</span></code> file in the repo root.</p>
+</div>
+</div>
+<div class="section" id="results-and-analysis">
+<h1>Results and Analysis<a class="headerlink" href="#results-and-analysis" title="Permalink to this headline">¶</a></h1>
+<p>Upon performing this experiment, we see that, while median performance degrades only slightly with data-deficient users (i.e., k = 3), the 25th percentile (bottom of box) degrades dramatically.</p>
+<div style="text-align:center" markdown="1"><p><img alt="Sentiment140 Results" src="../_images/leaf_rep_sent140.png" /></p>
+</div></div>
+<div class="section" id="more-information">
+<h1>More Information<a class="headerlink" href="#more-information" title="Permalink to this headline">¶</a></h1>
+<p>More information about the framework, challenges and experiments can be found in the <a class="reference external" href="https://arxiv.org/abs/1812.01097">LEAF paper</a>.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="femnist-md.html" class="btn btn-neutral float-right" title="Experiment Setup and Execution" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="General Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Talwalkar Lab
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

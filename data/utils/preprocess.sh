@@ -12,11 +12,19 @@ SFRAC="" # --sf tag, fraction of data to sample
 MINSAMPLES="na" # -k tag, minimum allowable # of samples per user
 TRAIN="na" # -t tag, user or sample
 TFRAC="" # --tf tag, fraction of data in training set
+SAMPLING_SEED="" # --smplseed, seed specified for sampling of data
+SPLIT_SEED="" # --spltseed, seed specified for train/test data split
+NO_CHECKSUM="" # --nochecksum, disable creation of MD5 checksum file after data gen
+VERIFICATION_FILE="" # --verify <fname>, check if JSON files' MD5 matches given digest
+
+META_DIR='meta'
+CHECKSUM_FNAME="${META_DIR}/dir-checksum.md5"
 
 while [[ $# -gt 0 ]]
 do
 key="$1"
 
+# TODO: Use getopts instead of creating cases!
 case $key in
     --name)
     NAME="$2"
@@ -81,6 +89,22 @@ case $key in
         shift # past value
     fi
     ;;
+    --smplseed)
+    SAMPLING_SEED="$2"
+    shift # past argument
+    ;;
+    --spltseed)
+    SPLIT_SEED="$2"
+    shift # past argument
+    ;;
+    --nochecksum)
+    NO_CHECKSUM="true"
+    shift # past argument
+    ;;
+    --verify)
+    VERIFICATION_FILE="$2"
+    shift # past argument
+    ;;
     *)    # unknown option
     shift # past argument
     ;;
@@ -88,10 +112,35 @@ esac
 done
 
 # --------------------
+# check if running in verification mode
+
+if [ -n "${VERIFICATION_FILE}" ]; then
+    pushd ../$NAME >/dev/null 2>/dev/null
+        TMP_FILE=`mktemp /tmp/dir-checksum.XXXXXXX`
+        find 'data/' -type f -name '*.json' -exec md5sum {} + | sort -k 2 > ${TMP_FILE}
+        DIFF=`diff --brief ${VERIFICATION_FILE} ${TMP_FILE}`
+        if [ $? -ne 0 ]; then
+            echo "${DIFF}"
+            diff ${TMP_FILE} ${VERIFICATION_FILE} 
+            echo "Differing checksums found - please verify"
+        else
+            echo "Matching JSON files and checksums found!"
+        fi
+    popd >/dev/null 2>/dev/null
+    exit 0
+fi
+
+# --------------------
 # preprocess data
 
 CONT_SCRIPT=true
 cd ../$NAME
+
+# setup meta directory if doesn't exist
+if [ ! -d ${META_DIR} ]; then
+    mkdir -p ${META_DIR}
+fi
+META_DIR=`realpath ${META_DIR}`
 
 # download data and convert to .json format
 
@@ -123,10 +172,13 @@ if [ "$CONT_SCRIPT" = true ] && [ ! $SAMPLE = "na" ]; then
 
         cd ../utils
 
+        # Defaults to -1 if not specified, causes script to randomly generate seed
+        SEED_ARGUMENT="${SAMPLING_SEED:--1}" 
+
         if [ $SAMPLE = "iid" ]; then
-            python3 sample.py $NAMETAG --iid $IUSERTAG $SFRACTAG
+            LEAF_DATA_META_DIR=${META_DIR} python3 sample.py $NAMETAG --iid $IUSERTAG $SFRACTAG --seed ${SEED_ARGUMENT}
         else
-            python3 sample.py $NAMETAG $SFRACTAG
+            LEAF_DATA_META_DIR=${META_DIR} python3 sample.py $NAMETAG $SFRACTAG --seed ${SEED_ARGUMENT}
         fi
 
         cd ../$NAME
@@ -173,16 +225,26 @@ if [ "$CONT_SCRIPT" = true ] && [ ! $TRAIN = "na" ]; then
 
         cd ../utils
 
+        # Defaults to -1 if not specified, causes script to randomly generate seed
+        SEED_ARGUMENT="${SPLIT_SEED:--1}"
+
         if [ -z $TRAIN ]; then
-            python3 split_data.py $NAMETAG $TFRACTAG
+            LEAF_DATA_META_DIR=${META_DIR} python3 split_data.py $NAMETAG $TFRACTAG --seed ${SEED_ARGUMENT}
         elif [ $TRAIN = "user" ]; then
-            python3 split_data.py $NAMETAG --by_user $TFRACTAG
+            LEAF_DATA_META_DIR=${META_DIR} python3 split_data.py $NAMETAG --by_user $TFRACTAG --seed ${SEED_ARGUMENT}
         elif [ $TRAIN = "sample" ]; then
-            python3 split_data.py $NAMETAG --by_sample $TFRACTAG
+            LEAF_DATA_META_DIR=${META_DIR} python3 split_data.py $NAMETAG --by_sample $TFRACTAG --seed ${SEED_ARGUMENT}
         fi
 
         cd ../$NAME
     fi
+fi
+
+if [ -z "${NO_CHECKSUM}" ]; then
+    echo '------------------------------'
+    echo "calculating JSON file checksums"
+    find 'data/' -type f -name '*.json' -exec md5sum {} + | sort -k 2 > ${CHECKSUM_FNAME}
+    echo "checksums written to ${CHECKSUM_FNAME}"
 fi
 
 if [ "$CONT_SCRIPT" = false ]; then

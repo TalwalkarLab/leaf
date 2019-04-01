@@ -1,0 +1,409 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>main &mdash; LEAF 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/customheader.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> LEAF
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install/get_leaf.html">Installation and Contribution</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">General Examples</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../autodoc/modules.html">models</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Additional Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../citations.html">Citing LEAF</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">LEAF</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>main</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Script to run the baselines.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+<span class="kn">import</span> <span class="nn">metrics.writer</span> <span class="k">as</span> <span class="nn">metrics_writer</span>
+
+<span class="kn">from</span> <span class="nn">baseline_constants</span> <span class="k">import</span> <span class="n">MAIN_PARAMS</span><span class="p">,</span> <span class="n">MODEL_PARAMS</span><span class="p">,</span> <span class="n">SIM_TIMES</span>
+<span class="kn">from</span> <span class="nn">client</span> <span class="k">import</span> <span class="n">Client</span>
+<span class="kn">from</span> <span class="nn">server</span> <span class="k">import</span> <span class="n">Server</span>
+<span class="kn">from</span> <span class="nn">model</span> <span class="k">import</span> <span class="n">ServerModel</span>
+
+<span class="kn">from</span> <span class="nn">utils.constants</span> <span class="k">import</span> <span class="n">DATASETS</span>
+<span class="kn">from</span> <span class="nn">utils.model_utils</span> <span class="k">import</span> <span class="n">read_data</span>
+
+<span class="n">STAT_METRICS_PATH</span> <span class="o">=</span> <span class="s1">&#39;metrics/stat_metrics.csv&#39;</span>
+<span class="n">SYS_METRICS_PATH</span> <span class="o">=</span> <span class="s1">&#39;metrics/sys_metrics.csv&#39;</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../autodoc/main.html#main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="n">model_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.py&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">model_path</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Please specify a valid dataset and a valid model.&#39;</span><span class="p">)</span>
+    <span class="n">model_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;############################## </span><span class="si">%s</span><span class="s1"> ##############################&#39;</span> <span class="o">%</span> <span class="n">model_path</span><span class="p">)</span>
+    <span class="n">mod</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+    <span class="n">ClientModel</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="s1">&#39;ClientModel&#39;</span><span class="p">)</span>
+
+    <span class="n">tup</span> <span class="o">=</span> <span class="n">MAIN_PARAMS</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">][</span><span class="n">args</span><span class="o">.</span><span class="n">t</span><span class="p">]</span>
+    <span class="n">num_rounds</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">num_rounds</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">num_rounds</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">tup</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">eval_every</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">eval_every</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">eval_every</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">tup</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">clients_per_round</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">clients_per_round</span> <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">clients_per_round</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">tup</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># Suppress tf warnings</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">WARN</span><span class="p">)</span>
+
+    <span class="c1"># Create 2 models</span>
+    <span class="n">model_params</span> <span class="o">=</span> <span class="n">MODEL_PARAMS</span><span class="p">[</span><span class="n">model_path</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">lr</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">model_params_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model_params</span><span class="p">)</span>
+        <span class="n">model_params_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">lr</span>
+        <span class="n">model_params</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">model_params_list</span><span class="p">)</span>
+    <span class="n">tf</span><span class="o">.</span><span class="n">reset_default_graph</span><span class="p">()</span>
+    <span class="n">client_model</span> <span class="o">=</span> <span class="n">ClientModel</span><span class="p">(</span><span class="o">*</span><span class="n">model_params</span><span class="p">)</span>
+    <span class="n">server_model</span> <span class="o">=</span> <span class="n">ServerModel</span><span class="p">(</span><span class="n">ClientModel</span><span class="p">(</span><span class="o">*</span><span class="n">model_params</span><span class="p">))</span>
+
+    <span class="c1"># Create server</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="n">Server</span><span class="p">(</span><span class="n">server_model</span><span class="p">)</span>
+
+    <span class="c1"># Create clients</span>
+    <span class="n">clients</span> <span class="o">=</span> <span class="n">setup_clients</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">client_model</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> Clients in Total&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">clients</span><span class="p">))</span>
+
+    <span class="c1"># Test untrained model on all clients</span>
+    <span class="n">stat_metrics</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">test_model</span><span class="p">(</span><span class="n">clients</span><span class="p">)</span>
+    <span class="n">all_ids</span><span class="p">,</span> <span class="n">all_groups</span><span class="p">,</span> <span class="n">all_num_samples</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get_clients_test_info</span><span class="p">(</span><span class="n">clients</span><span class="p">)</span>
+    <span class="n">metrics_writer</span><span class="o">.</span><span class="n">print_metrics</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">all_ids</span><span class="p">,</span> <span class="n">stat_metrics</span><span class="p">,</span> <span class="n">all_groups</span><span class="p">,</span> <span class="n">all_num_samples</span><span class="p">,</span> <span class="n">STAT_METRICS_PATH</span><span class="p">)</span>
+    <span class="n">print_metrics</span><span class="p">(</span><span class="n">stat_metrics</span><span class="p">,</span> <span class="n">all_num_samples</span><span class="p">)</span>
+
+    <span class="c1"># Simulate training</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rounds</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--- Round </span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1">: Training </span><span class="si">%d</span><span class="s1"> Clients ---&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_rounds</span><span class="p">,</span> <span class="n">clients_per_round</span><span class="p">))</span>
+
+        <span class="c1"># Select clients to train this round</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">select_clients</span><span class="p">(</span><span class="n">online</span><span class="p">(</span><span class="n">clients</span><span class="p">),</span> <span class="n">num_clients</span><span class="o">=</span><span class="n">clients_per_round</span><span class="p">)</span>
+        <span class="n">c_ids</span><span class="p">,</span> <span class="n">c_groups</span><span class="p">,</span> <span class="n">c_num_samples</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">get_clients_test_info</span><span class="p">()</span>
+
+        <span class="c1"># Simulate server model training on selected clients&#39; data</span>
+        <span class="n">sys_metics</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">train_model</span><span class="p">(</span><span class="n">num_epochs</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">num_epochs</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">minibatch</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">minibatch</span><span class="p">)</span>
+        <span class="n">metrics_writer</span><span class="o">.</span><span class="n">print_metrics</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">c_ids</span><span class="p">,</span> <span class="n">sys_metics</span><span class="p">,</span> <span class="n">c_groups</span><span class="p">,</span> <span class="n">c_num_samples</span><span class="p">,</span> <span class="n">SYS_METRICS_PATH</span><span class="p">)</span>
+
+        <span class="c1"># Update server model</span>
+        <span class="n">server</span><span class="o">.</span><span class="n">update_model</span><span class="p">()</span>
+
+        <span class="c1"># Test model on all clients</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="n">eval_every</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">num_rounds</span><span class="p">:</span>
+            <span class="n">stat_metrics</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">test_model</span><span class="p">(</span><span class="n">clients</span><span class="p">)</span>
+            <span class="n">metrics_writer</span><span class="o">.</span><span class="n">print_metrics</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">all_ids</span><span class="p">,</span> <span class="n">stat_metrics</span><span class="p">,</span> <span class="n">all_groups</span><span class="p">,</span> <span class="n">all_num_samples</span><span class="p">,</span> <span class="n">STAT_METRICS_PATH</span><span class="p">)</span>
+            <span class="n">print_metrics</span><span class="p">(</span><span class="n">stat_metrics</span><span class="p">,</span> <span class="n">all_num_samples</span><span class="p">)</span>
+
+    <span class="c1"># Save server model</span>
+    <span class="n">save_model</span><span class="p">(</span><span class="n">server_model</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="c1"># Close models</span>
+    <span class="n">server_model</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">client_model</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="online"><a class="viewcode-back" href="../autodoc/main.html#main.online">[docs]</a><span class="k">def</span> <span class="nf">online</span><span class="p">(</span><span class="n">clients</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;We assume all users are always online.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">clients</span></div>
+
+
+<div class="viewcode-block" id="parse_args"><a class="viewcode-back" href="../autodoc/main.html#main.parse_args">[docs]</a><span class="k">def</span> <span class="nf">parse_args</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-dataset&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;name of dataset;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                    <span class="n">choices</span><span class="o">=</span><span class="n">DATASETS</span><span class="p">,</span>
+                    <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-model&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;name of model;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                    <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--num-rounds&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of rounds to simulate;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--eval-every&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;evaluate every ____ rounds;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--clients-per-round&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of clients trained per round;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--batch_size&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;batch size when clients train on data;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--minibatch&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;None for FedAvg, else fraction;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--num_epochs&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of epochs when clients train on data;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-t&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;simulation time: small, medium, or large;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                    <span class="n">choices</span><span class="o">=</span><span class="n">SIM_TIMES</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="s1">&#39;large&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-lr&#39;</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;learning rate for local optimizers;&#39;</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                    <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="setup_clients"><a class="viewcode-back" href="../autodoc/main.html#main.setup_clients">[docs]</a><span class="k">def</span> <span class="nf">setup_clients</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Instantiates clients based on given train and test data directories.</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        all_clients: list of Client objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">train_data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;train&#39;</span><span class="p">)</span>
+    <span class="n">test_data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">)</span>
+
+    <span class="n">users</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">train_data</span><span class="p">,</span> <span class="n">test_data</span> <span class="o">=</span> <span class="n">read_data</span><span class="p">(</span><span class="n">train_data_dir</span><span class="p">,</span> <span class="n">test_data_dir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">users</span><span class="p">]</span>
+    <span class="n">all_clients</span> <span class="o">=</span> <span class="p">[</span><span class="n">Client</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">train_data</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">test_data</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">model</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">users</span><span class="p">,</span> <span class="n">groups</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">all_clients</span></div>
+
+
+<div class="viewcode-block" id="save_model"><a class="viewcode-back" href="../autodoc/main.html#main.save_model">[docs]</a><span class="k">def</span> <span class="nf">save_model</span><span class="p">(</span><span class="n">server_model</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Saves the given server model on checkpoints/dataset/model.ckpt.&quot;&quot;&quot;</span>
+    <span class="c1"># Save server model</span>
+    <span class="n">ckpt_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;checkpoints&#39;</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">ckpt_path</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">ckpt_path</span><span class="p">)</span>
+    <span class="n">save_path</span> <span class="o">=</span> <span class="n">server_model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ckpt_path</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.ckpt&#39;</span> <span class="o">%</span> <span class="n">model</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Model saved in path: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">save_path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="print_metrics"><a class="viewcode-back" href="../autodoc/main.html#main.print_metrics">[docs]</a><span class="k">def</span> <span class="nf">print_metrics</span><span class="p">(</span><span class="n">metrics</span><span class="p">,</span> <span class="n">weights</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Prints weighted averages of the given metrics.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        metrics: dict with client ids as keys. Each entry is a dict</span>
+<span class="sd">            with the metrics of that client.</span>
+<span class="sd">        weights: dict with client ids as keys. Each entry is the weight</span>
+<span class="sd">            for that client.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ordered_weights</span> <span class="o">=</span> <span class="p">[</span><span class="n">weights</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">weights</span><span class="p">)]</span>
+    <span class="n">metric_names</span> <span class="o">=</span> <span class="n">metrics_writer</span><span class="o">.</span><span class="n">get_metrics_names</span><span class="p">(</span><span class="n">metrics</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metric_names</span><span class="p">:</span>
+        <span class="n">ordered_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">metric</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metrics</span><span class="p">)]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: </span><span class="si">%g</span><span class="s1">, 10th percentile: </span><span class="si">%g</span><span class="s1">, 90th percentile </span><span class="si">%g</span><span class="s1">&#39;</span> \
+              <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span>
+                 <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">ordered_metric</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">ordered_weights</span><span class="p">),</span>
+                 <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">ordered_metric</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                 <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">ordered_metric</span><span class="p">,</span> <span class="mi">90</span><span class="p">)))</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Talwalkar Lab
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
