@@ -7,9 +7,9 @@ IMAGE_SIZE = 28
 
 
 class ClientModel(Model):
-    def __init__(self, lr, num_classes):
+    def __init__(self, seed, lr, num_classes):
         self.num_classes = num_classes
-        super(ClientModel, self).__init__(lr)
+        super(ClientModel, self).__init__(seed, lr)
 
     def create_model(self):
         """Model function for CNN."""
@@ -43,4 +43,4 @@ class ClientModel(Model):
             loss=loss,
             global_step=tf.train.get_global_step())
         eval_metric_ops = tf.count_nonzero(tf.equal(labels, predictions["classes"]))
-        return features, labels, train_op, eval_metric_ops
+        return features, labels, train_op, eval_metric_ops, loss

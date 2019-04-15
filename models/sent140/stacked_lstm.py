@@ -14,7 +14,7 @@ VOCAB_DIR = 'sent140/embs.json'
 
 class ClientModel(Model):
 
-    def __init__(self, lr, seq_len, num_classes, n_hidden, emb_arr=None):
+    def __init__(self, seed, lr, seq_len, num_classes, n_hidden, emb_arr=None):
         self.seq_len = seq_len
         self.num_classes = num_classes
         self.n_hidden = n_hidden
@@ -22,7 +22,7 @@ class ClientModel(Model):
         self.vocab_size = len(vocab)
         if emb_arr:
             self.emb_arr = emb_arr
-        super(ClientModel, self).__init__(lr)
+        super(ClientModel, self).__init__(seed, lr)
 
     def create_model(self):
         features = tf.placeholder(tf.int32, [None, self.seq_len])
@@ -45,7 +45,7 @@ class ClientModel(Model):
         correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(labels, 1))
         eval_metric_ops = tf.count_nonzero(correct_pred)
         
-        return features, labels, train_op, eval_metric_ops
+        return features, labels, train_op, eval_metric_ops, loss
 
     def process_x(self, raw_x_batch, max_words=25):
         x_batch = [e[4] for e in raw_x_batch]

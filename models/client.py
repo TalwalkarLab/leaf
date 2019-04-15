@@ -37,16 +37,18 @@ class Client:
             # Minibatch trains for only 1 epoch - multiple local epochs don't make sense!
             num_epochs = 1
             comp, update = self.model.train(data, num_epochs, num_data)
-        num_train_samples = len(data)
+        num_train_samples = len(data['y'])
         return comp, num_train_samples, update
 
-    def test(self, model):
+    def test(self, data=None):
         """Tests self.model on self.eval_data.
 
         Return:
             dict of metrics returned by the model.
         """
-        return model.test(self.eval_data)
+        if data is None:
+            data = self.eval_data
+        return self.model.test(data)
 
     @property
     def num_test_samples(self):
@@ -56,6 +58,15 @@ class Client:
             int: Number of test samples for this client
         """
         return len(self.eval_data['y'])
+
+    @property
+    def num_train_samples(self):
+        """Number of test samples for this client.
+
+        Return:
+            int: Number of test samples for this client
+        """
+        return len(self.train_data['y'])
 
     @property
     def model(self):

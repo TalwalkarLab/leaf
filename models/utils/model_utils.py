@@ -1,24 +1,27 @@
 import json
 import numpy as np
 import os
-import re
-import sys
-
 
 def batch_data(data, batch_size):
     '''
-    data is a dict := {'x': [list], 'y': [list]}
-    returns x, y, which are both lists of size-batch_size lists
+    data is a dict := {'x': [numpy array], 'y': [numpy array]} (on one client)
+    returns x, y, which are both numpy array of length: batch_size
     '''
-    raw_x = data['x']
-    raw_y = data['y']        
-    batched_x = []
-    batched_y = []
-    for i in range(0, len(raw_x), batch_size):
-        batched_x.append(raw_x[i:i+batch_size])
-        batched_y.append(raw_y[i:i+batch_size])
-    return batched_x, batched_y
+    data_x = data['x']
+    data_y = data['y']
 
+    # randomly shuffle data
+    np.random.seed(100)
+    rng_state = np.random.get_state()
+    np.random.shuffle(data_x)
+    np.random.set_state(rng_state)
+    np.random.shuffle(data_y)
+
+    # loop through mini-batches
+    for i in range(0, len(data_x), batch_size):
+        batched_x = data_x[i:i+batch_size]
+        batched_y = data_y[i:i+batch_size]
+        yield (batched_x, batched_y)
 
 def read_data(train_data_dir, test_data_dir):
     '''parses data in given train and test data directories
@@ -53,11 +56,11 @@ def read_data(train_data_dir, test_data_dir):
     test_files = os.listdir(test_data_dir)
     test_files = [f for f in test_files if f.endswith('.json')]
     for f in test_files:
-        file_path = os.path.join(test_data_dir, f)
+        file_path = os.path.join(test_data_dir,f)
         with open(file_path, 'r') as inf:
             cdata = json.load(inf)
         test_data.update(cdata['user_data'])
 
-    clients = list(train_data.keys())
+    clients = list(sorted(train_data.keys()))
 
     return clients, groups, train_data, test_data

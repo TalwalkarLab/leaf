@@ -1,5 +1,4 @@
 """Script to run the baselines."""
-
 import argparse
 import importlib
 import numpy as np
@@ -21,14 +20,14 @@ from utils.model_utils import read_data
 STAT_METRICS_PATH = 'metrics/stat_metrics.csv'
 SYS_METRICS_PATH = 'metrics/sys_metrics.csv'
 
-
 def main():
 
     args = parse_args()
 
     # Set the random seed if provided (affects client sampling, and batching)
-    if args.seed is not None:
-        random.seed(args.seed)
+    random.seed(1 + args.seed)
+    np.random.seed(12 + args.seed)
+    tf.set_random_seed(123 + args.seed)
 
     model_path = '%s/%s.py' % (args.dataset, args.model)
     if not os.path.exists(model_path):
@@ -53,49 +52,46 @@ def main():
         model_params_list = list(model_params)
         model_params_list[0] = args.lr
         model_params = tuple(model_params_list)
+
+    # Create client model, and share params with server model
     tf.reset_default_graph()
-    client_model = ClientModel(*model_params)
-    server_model = ServerModel(ClientModel(*model_params))
+    client_model = ClientModel(args.seed, *model_params)
 
     # Create server
-    server = Server(server_model)
+    server = Server(client_model)
 
     # Create clients
     clients = setup_clients(args.dataset, client_model)
+    all_ids, all_groups, all_num_samples, all_train_samples = server.get_clients_test_info(clients)
     print('%d Clients in Total' % len(clients))
-
-    # Test untrained model on all clients
-    stat_metrics = server.test_model(clients)
-    all_ids, all_groups, all_num_samples = server.get_clients_test_info(clients)
-    metrics_writer.print_metrics(0, all_ids, stat_metrics, all_groups, all_num_samples, STAT_METRICS_PATH)
-    print_metrics(stat_metrics, all_num_samples)
 
     # Simulate training
     for i in range(num_rounds):
         print('--- Round %d of %d: Training %d Clients ---' % (i+1, num_rounds, clients_per_round))
 
+        # Test model on all clients
+        if i % eval_every == 0 or i == num_rounds:
+            train_stat_metrics = server.get_train_stats(clients)
+            print_metrics(train_stat_metrics, all_train_samples, prefix='train_')
+            stat_metrics = server.test_model(clients)
+            metrics_writer.print_metrics(i, all_ids, stat_metrics, all_groups, all_num_samples, STAT_METRICS_PATH)
+            print_metrics(stat_metrics, all_num_samples, prefix='test_')
+
         # Select clients to train this round
-        server.select_clients(online(clients), num_clients=clients_per_round)
-        c_ids, c_groups, c_num_samples = server.get_clients_test_info()
+        server.select_clients(i, online(clients), num_clients=clients_per_round)
+        c_ids, c_groups, c_num_samples, _ = server.get_clients_test_info()
 
         # Simulate server model training on selected clients' data
         sys_metics = server.train_model(num_epochs=args.num_epochs, batch_size=args.batch_size, minibatch=args.minibatch)
-        metrics_writer.print_metrics(i, c_ids, sys_metics, c_groups, c_num_samples, SYS_METRICS_PATH)
-
         # Update server model
         server.update_model()
-
-        # Test model on all clients
-        if (i + 1) % eval_every == 0 or (i + 1) == num_rounds:
-            stat_metrics = server.test_model(clients)
-            metrics_writer.print_metrics(i, all_ids, stat_metrics, all_groups, all_num_samples, STAT_METRICS_PATH)
-            print_metrics(stat_metrics, all_num_samples)
+        metrics_writer.print_metrics(i, c_ids, sys_metics, c_groups, c_num_samples, SYS_METRICS_PATH)
 
     # Save server model
-    save_model(server_model, args.dataset, args.model)
+    # save_model(server_model, dataset, model)
 
     # Close models
-    server_model.close()
+    # server_model.close()
     client_model.close()
 
 
@@ -135,7 +131,7 @@ def parse_args():
     parser.add_argument('--seed',
                     help='seed for random client sampling and batch splitting',
                     type=int,
-                    default=None)
+                    default=0)
 
     # Minibatch doesn't support num_epochs, so make them mutually exclusive
     epoch_capability_group = parser.add_mutually_exclusive_group()
@@ -160,7 +156,6 @@ def parse_args():
                     required=False)
 
     return parser.parse_args()
-
 
 def setup_clients(dataset, model=None):
     """Instantiates clients based on given train and test data directories.
@@ -188,7 +183,7 @@ def save_model(server_model, dataset, model):
     print('Model saved in path: %s' % save_path)
 
 
-def print_metrics(metrics, weights):
+def print_metrics(metrics, weights, prefix=''):
     """Prints weighted averages of the given metrics.
 
     Args:
@@ -202,7 +197,7 @@ def print_metrics(metrics, weights):
     for metric in metric_names:
         ordered_metric = [metrics[c][metric] for c in sorted(metrics)]
         print('%s: %g, 10th percentile: %g, 90th percentile %g' \
-              % (metric,
+              % (prefix + metric,
                  np.average(ordered_metric, weights=ordered_weights),
                  np.percentile(ordered_metric, 10),
                  np.percentile(ordered_metric, 90)))

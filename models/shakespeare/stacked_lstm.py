@@ -9,11 +9,11 @@ from model import Model
 from utils.language_utils import letter_to_vec, word_to_indices
 
 class ClientModel(Model):
-    def __init__(self, lr, seq_len, num_classes, n_hidden):
+    def __init__(self, seed, lr, seq_len, num_classes, n_hidden):
         self.seq_len = seq_len
         self.num_classes = num_classes
         self.n_hidden = n_hidden
-        super(ClientModel, self).__init__(lr)
+        super(ClientModel, self).__init__(seed, lr)
 
     def create_model(self):
         features = tf.placeholder(tf.int32, [None, self.seq_len])
@@ -35,7 +35,7 @@ class ClientModel(Model):
         correct_pred = tf.equal(tf.argmax(pred, 1), tf.argmax(labels, 1))
         eval_metric_ops = tf.count_nonzero(correct_pred)
 
-        return features, labels, train_op, eval_metric_ops
+        return features, labels, train_op, eval_metric_ops, loss
 
     def process_x(self, raw_x_batch):
         x_batch = [word_to_indices(word) for word in raw_x_batch]
