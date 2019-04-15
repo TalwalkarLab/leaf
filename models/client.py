@@ -57,6 +57,8 @@ class Client:
         Return:
             int: Number of test samples for this client
         """
+        if self.eval_data is None:
+            return 0
         return len(self.eval_data['y'])
 
     @property
@@ -66,6 +68,8 @@ class Client:
         Return:
             int: Number of test samples for this client
         """
+        if self.train_data is None:
+            return 0
         return len(self.train_data['y'])
 
     @property

@@ -61,9 +61,18 @@ def main():
     server = Server(client_model)
 
     # Create clients
-    clients = setup_clients(args.dataset, client_model)
-    all_ids, all_groups, all_num_samples, all_train_samples = server.get_clients_test_info(clients)
-    print('%d Clients in Total' % len(clients))
+    train_clients, test_clients = setup_clients(args.dataset, client_model, args.is_client_split)
+    train_ids, train_groups, num_train_samples, _ = server.get_clients_info(train_clients)
+    test_ids, test_groups, _, num_test_samples = server.get_clients_info(test_clients)
+    print('Clients in Total: %d train, %d test' % (len(train_clients), len(test_clients)))
+
+    # Initial status
+    print('--- Round 0 of %d ---' % (num_rounds))
+    train_stat_metrics = server.get_train_stats(train_clients)
+    print_metrics(train_stat_metrics, num_train_samples, prefix='train_')
+    stat_metrics = server.metatest_model(test_clients, query_fraction=0.1, num_epochs=args.num_epochs, batch_size=args.batch_size)
+    metrics_writer.print_metrics(0, test_ids, stat_metrics, test_groups, num_test_samples, STAT_METRICS_PATH)
+    print_metrics(stat_metrics, num_test_samples, prefix='test_')
 
     # Simulate training
     for i in range(num_rounds):
@@ -78,14 +87,23 @@ def main():
             print_metrics(stat_metrics, all_num_samples, prefix='test_')
 
         # Select clients to train this round
-        server.select_clients(i, online(clients), num_clients=clients_per_round)
-        c_ids, c_groups, c_num_samples, _ = server.get_clients_test_info()
+        server.select_clients(i, online(train_clients), num_clients=clients_per_round)
+        c_ids, c_groups, c_num_samples, _ = server.get_clients_info(server.selected_clients)
 
         # Simulate server model training on selected clients' data
         sys_metics = server.train_model(num_epochs=args.num_epochs, batch_size=args.batch_size, minibatch=args.minibatch)
+
         # Update server model
         server.update_model()
         metrics_writer.print_metrics(i, c_ids, sys_metics, c_groups, c_num_samples, SYS_METRICS_PATH)
+
+        # Test model
+        if (i+1) % eval_every == 0 or i == num_rounds:
+            train_stat_metrics = server.get_train_stats(train_clients)
+            print_metrics(train_stat_metrics, num_train_samples, prefix='train_')
+            stat_metrics = server.metatest_model(test_clients, query_fraction=0.1, num_epochs=args.num_epochs, batch_size=args.batch_size)
+            metrics_writer.print_metrics((i+1), test_ids, stat_metrics, test_groups, num_test_samples, STAT_METRICS_PATH)
+            print_metrics(stat_metrics, num_test_samples, prefix='test_')
 
     # Save server model
     # save_model(server_model, dataset, model)
@@ -132,6 +150,8 @@ def parse_args():
                     help='seed for random client sampling and batch splitting',
                     type=int,
                     default=0)
+    parser.add_argument('--is-client-split', action='store_true',
+                    help='data split is according to clients')
 
     # Minibatch doesn't support num_epochs, so make them mutually exclusive
     epoch_capability_group = parser.add_mutually_exclusive_group()
@@ -157,7 +177,13 @@ def parse_args():
 
     return parser.parse_args()
 
-def setup_clients(dataset, model=None):
+def create_clients(users, groups, train_data, test_data, model):
+    if len(groups) == 0:
+        groups = [[] for _ in users]
+    clients = [Client(u, g, train_data[u], test_data[u], model) for u, g in zip(users, groups)]
+    return clients
+
+def setup_clients(dataset, model=None, is_client_split=False):
     """Instantiates clients based on given train and test data directories.
 
     Return:
@@ -166,11 +192,13 @@ def setup_clients(dataset, model=None):
     train_data_dir = os.path.join('..', 'data', dataset, 'data', 'train')
     test_data_dir = os.path.join('..', 'data', dataset, 'data', 'test')
 
-    users, groups, train_data, test_data = read_data(train_data_dir, test_data_dir)
-    if len(groups) == 0:
-        groups = [[] for _ in users]
-    all_clients = [Client(u, g, train_data[u], test_data[u], model) for u, g in zip(users, groups)]
-    return all_clients
+    conv_data = read_data(train_data_dir, test_data_dir, is_client_split)
+    (train_users, test_users), (train_groups, test_groups), train_data, test_data = conv_data
+
+    train_clients = create_clients(train_users, train_groups, train_data, test_data, model)
+    test_clients = create_clients(test_users, test_groups, train_data, test_data, model)
+
+    return train_clients, test_clients
 
 
 def save_model(server_model, dataset, model):

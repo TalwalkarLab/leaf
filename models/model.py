@@ -14,9 +14,9 @@ from utils.tf_utils import graph_size
 
 class Model(ABC):
 
-    def __init__(self, seed, lr):
+    def __init__(self, seed, lr, optimizer=None):
         self.lr = lr
-        self._optimizer = None
+        self._optimizer = optimizer
 
         self.graph = tf.Graph()
         with self.graph.as_default():
@@ -81,6 +81,23 @@ class Model(ABC):
             update: List of np.ndarray weights, with each weight array
                 corresponding to a variable in the resulting graph
         """
+<<<<<<< HEAD
+=======
+        for _ in range(num_epochs):
+            for batched_x, batched_y in batch_data(data, batch_size):
+                input_data = self.process_x(batched_x)
+                target_data = self.process_y(batched_y)
+                with self.graph.as_default():
+                    self.sess.run(self.train_op,
+                        feed_dict={self.features: input_data, self.labels: target_data})
+        update = self.get_params()
+        comp = num_epochs * (len(data['y'])//batch_size) * batch_size * self.flops
+        return comp, update
+
+    # TODO: Confirm if num_epochs semantics should be changed to minibatches?
+    # Right now, this is equivalent to the train method (as it should be :p)
+    def finetune(self, data, num_epochs, batch_size):
+>>>>>>> fb15579... parent bd814c55ee84a1a6184ab1155f2baf13cdab2016
         for _ in range(num_epochs):
             for batched_x, batched_y in batch_data(data, batch_size):
                 input_data = self.process_x(batched_x)

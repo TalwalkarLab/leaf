@@ -1,6 +1,7 @@
 import json
 import numpy as np
 import os
+from collections import defaultdict
 
 def batch_data(data, batch_size):
     '''
@@ -23,7 +24,51 @@ def batch_data(data, batch_size):
         batched_y = data_y[i:i+batch_size]
         yield (batched_x, batched_y)
 
-def read_data(train_data_dir, test_data_dir):
+
+def gen_frac_query(data, query_fraction=0.1):
+    X = data['x']
+    y = data['y']
+
+    label_mapping = defaultdict(lambda : [])
+    for idx, y_val in enumerate(y):
+        label_mapping[y_val].append(idx)
+
+    # Split idxes
+    support_fraction = (1. - query_fraction)
+    support_idx, query_idx = [], []
+    for label, label_idx in label_mapping.items():
+        support_set_cnt = int(support_fraction * len(label_idx))
+        perm = np.random.permutation(label_idx)
+        split = np.split(perm, [support_set_cnt, len(perm)])
+        support_idx.extend(split[0])
+        query_idx.extend(split[1])
+
+    support_X, support_y = [X[idx] for idx in support_idx], [y[idx] for idx in support_idx]
+    query_X, query_y = [X[idx] for idx in query_idx], [y[idx] for idx in query_idx]
+
+    return {'x': support_X, 'y': support_y}, {'x': query_X, 'y': query_y}
+
+
+def read_dir(data_dir):
+    clients = []
+    groups = []
+    data = defaultdict(lambda : None)
+
+    files = os.listdir(data_dir)
+    files = [f for f in files if f.endswith('.json')]
+    for f in files:
+        file_path = os.path.join(data_dir,f)
+        with open(file_path, 'r') as inf:
+            cdata = json.load(inf)
+        clients.extend(cdata['users'])
+        if 'hierarchies' in cdata:
+            groups.extend(cdata['hierarchies'])
+        data.update(cdata['user_data'])
+
+    clients = list(sorted(data.keys()))
+    return clients, groups, data
+
+def read_data(train_data_dir, test_data_dir, is_client_split=False):
     '''parses data in given train and test data directories
 
     assumes:
@@ -37,30 +82,10 @@ def read_data(train_data_dir, test_data_dir):
         train_data: dictionary of train data
         test_data: dictionary of test data
     '''
-    clients = []
-    groups = []
-    train_data = {}
-    test_data = {}
+    train_clients, train_groups, train_data = read_dir(train_data_dir)
+    test_clients, test_groups, test_data = read_dir(test_data_dir)
 
-    train_files = os.listdir(train_data_dir)
-    train_files = [f for f in train_files if f.endswith('.json')]
-    for f in train_files:
-        file_path = os.path.join(train_data_dir,f)
-        with open(file_path, 'r') as inf:
-            cdata = json.load(inf)
-        clients.extend(cdata['users'])
-        if 'hierarchies' in cdata:
-            groups.extend(cdata['hierarchies'])
-        train_data.update(cdata['user_data'])
-
-    test_files = os.listdir(test_data_dir)
-    test_files = [f for f in test_files if f.endswith('.json')]
-    for f in test_files:
-        file_path = os.path.join(test_data_dir,f)
-        with open(file_path, 'r') as inf:
-            cdata = json.load(inf)
-        test_data.update(cdata['user_data'])
-
-    clients = list(sorted(train_data.keys()))
-
-    return clients, groups, train_data, test_data
+    if is_client_split is False:
+        return (train_clients, train_clients), (train_groups, train_groups), train_data, test_data
+    print ('Creating split by clients')
+    return (train_clients, test_clients), (train_groups, test_groups), train_data, test_data

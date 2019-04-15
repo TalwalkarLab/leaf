@@ -1,6 +1,7 @@
 import numpy as np
 
 from baseline_constants import BYTES_WRITTEN_KEY, BYTES_READ_KEY, LOCAL_COMPUTATIONS_KEY
+from utils.model_utils import gen_frac_query
 
 class Server:
     
@@ -26,7 +27,7 @@ class Server:
         np.random.seed(round)
         self.selected_clients = np.random.choice(possible_clients, num_clients, replace=False)
 
-        return [(len(c.train_data['y']), len(c.eval_data['y'])) for c in self.selected_clients]
+        return [(c.num_train_samples, c.num_test_samples) for c in self.selected_clients]
 
     def train_model(self, num_epochs=1, batch_size=10, minibatch=None, clients=None):
         """Trains self.model on given clients.
@@ -67,6 +68,24 @@ class Server:
 
         return sys_metrics
 
+    def metatest_model(self, clients, query_fraction, num_epochs=1, batch_size=10):
+        metrics = {}
+
+        cur_model_params = self.model
+        for client in clients:
+            support, query = gen_frac_query(client.eval_data, query_fraction)
+
+            client.model.set_params(cur_model_params)
+            _, finetuned_model = client.model.finetune(support, num_epochs, batch_size)
+            client.model.set_params(finetuned_model)
+
+            c_metrics = client.test(query)
+            metrics[client.id] = c_metrics
+        self.model = cur_model_params
+        self.client_model.set_params(cur_model_params)
+
+        return metrics
+
     def update_model(self):
         total_weight = 0.
         base = [0] * len(self.updates[0][1])
@@ -106,7 +125,7 @@ class Server:
             metrics[client.id] = c_metrics
         return metrics
 
-    def get_clients_test_info(self, clients=None):
+    def get_clients_info(self, clients):
         """Returns the ids, hierarchies and num_test_samples for the given clients.
 
         Returns info about self.selected_clients if clients=None;
@@ -114,10 +133,8 @@ class Server:
         Args:
             clients: list of Client objects.
         """
-        if clients is None:
-            clients = self.selected_clients
         ids = [c.id for c in clients]
         groups = {c.id: c.group for c in clients}
-        num_samples = {c.id: c.num_test_samples for c in clients}
+        num_test_samples = {c.id: c.num_test_samples for c in clients}
         num_train_samples = {c.id: c.num_train_samples for c in clients}
-        return ids, groups, num_samples, num_train_samples
+        return ids, groups, num_train_samples, num_test_samples
