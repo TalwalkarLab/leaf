@@ -70,7 +70,7 @@ def main():
     print('--- Round 0 of %d ---' % (num_rounds))
     train_stat_metrics = server.get_train_stats(train_clients)
     print_metrics(train_stat_metrics, num_train_samples, prefix='train_')
-    stat_metrics = server.metatest_model(test_clients, query_fraction=0.1, num_epochs=args.num_epochs, batch_size=args.batch_size)
+    stat_metrics = server.test_model(test_clients, query_fraction=0.1, num_epochs=args.num_epochs, batch_size=args.batch_size)
     metrics_writer.print_metrics(0, test_ids, stat_metrics, test_groups, num_test_samples, STAT_METRICS_PATH)
     print_metrics(stat_metrics, num_test_samples, prefix='test_')
 
@@ -101,7 +101,7 @@ def main():
         if (i+1) % eval_every == 0 or i == num_rounds:
             train_stat_metrics = server.get_train_stats(train_clients)
             print_metrics(train_stat_metrics, num_train_samples, prefix='train_')
-            stat_metrics = server.metatest_model(test_clients, query_fraction=0.1, num_epochs=args.num_epochs, batch_size=args.batch_size)
+            stat_metrics = server.test_model(test_clients, query_fraction=0.1, num_epochs=args.num_epochs, batch_size=args.batch_size)
             metrics_writer.print_metrics((i+1), test_ids, stat_metrics, test_groups, num_test_samples, STAT_METRICS_PATH)
             print_metrics(stat_metrics, num_test_samples, prefix='test_')
 
