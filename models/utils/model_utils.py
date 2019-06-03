@@ -3,6 +3,7 @@ import numpy as np
 import os
 from collections import defaultdict
 
+
 def batch_data(data, batch_size):
     '''
     data is a dict := {'x': [numpy array], 'y': [numpy array]} (on one client)
@@ -25,30 +26,6 @@ def batch_data(data, batch_size):
         yield (batched_x, batched_y)
 
 
-def gen_frac_query(data, query_fraction=0.1):
-    X = data['x']
-    y = data['y']
-
-    label_mapping = defaultdict(lambda : [])
-    for idx, y_val in enumerate(y):
-        label_mapping[y_val].append(idx)
-
-    # Split idxes
-    support_fraction = (1. - query_fraction)
-    support_idx, query_idx = [], []
-    for label, label_idx in label_mapping.items():
-        support_set_cnt = int(support_fraction * len(label_idx))
-        perm = np.random.permutation(label_idx)
-        split = np.split(perm, [support_set_cnt, len(perm)])
-        support_idx.extend(split[0])
-        query_idx.extend(split[1])
-
-    support_X, support_y = [X[idx] for idx in support_idx], [y[idx] for idx in support_idx]
-    query_X, query_y = [X[idx] for idx in query_idx], [y[idx] for idx in query_idx]
-
-    return {'x': support_X, 'y': support_y}, {'x': query_X, 'y': query_y}
-
-
 def read_dir(data_dir):
     clients = []
     groups = []
@@ -68,7 +45,8 @@ def read_dir(data_dir):
     clients = list(sorted(data.keys()))
     return clients, groups, data
 
-def read_data(train_data_dir, test_data_dir, is_client_split=False):
+
+def read_data(train_data_dir, test_data_dir):
     '''parses data in given train and test data directories
 
     assumes:
@@ -85,7 +63,7 @@ def read_data(train_data_dir, test_data_dir, is_client_split=False):
     train_clients, train_groups, train_data = read_dir(train_data_dir)
     test_clients, test_groups, test_data = read_dir(test_data_dir)
 
-    if is_client_split is False:
-        return (train_clients, train_clients), (train_groups, train_groups), train_data, test_data
-    print ('Creating split by clients')
-    return (train_clients, test_clients), (train_groups, test_groups), train_data, test_data
+    assert train_clients == test_clients
+    assert train_groups == test_groups
+
+    return train_clients, train_groups, train_data, test_data

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-output_dir="${1:-'./baseline'}"
+output_dir="${1:-./baseline}"
 
 split_seed="1549786796"
 sampling_seed="1549786595"
@@ -36,7 +36,7 @@ function run_fedavg() {
 	num_epochs="$2"
 
 	pushd models/
-		python main.py -dataset 'femnist' -model 'cnn' --num-rounds ${num_rounds} --clients-per-round ${clients_per_round} --num_epochs ${num_epochs} -lr ${fedavg_lr}
+		python main.py -dataset 'femnist' -model 'cnn' --num-rounds ${num_rounds} --clients-per-round ${clients_per_round} --num-epochs ${num_epochs} -lr ${fedavg_lr}
 	popd
 	move_data ${output_dir} "fedavg_c_${clients_per_round}_e_${num_epochs}"
 }
@@ -69,7 +69,7 @@ if [ ! -d 'data/femnist/data/train' ]; then
 
 	echo "Couldn't find FEMNIST data - running data preprocessing script"
 	pushd data/femnist/
-		rm -rf meta/ data/all_data data/test data/train data/rem_user_data data/intermediate
+		rm -rf meta/ data/test data/train data/rem_user_data data/intermediate
 		./preprocess.sh -s niid --sf 0.05 -k 100 -t sample --smplseed ${sampling_seed} --spltseed ${split_seed}
 	popd
 fi

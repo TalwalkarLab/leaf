@@ -1,8 +1,5 @@
 """Configuration file for common models/experiments"""
 
-SIM_TIMES = ['small', 'medium', 'large']
-"""list: Common sets of configuration for simulations"""
-
 MAIN_PARAMS = { 
     'sent140': {
         'small': (10, 2, 2),

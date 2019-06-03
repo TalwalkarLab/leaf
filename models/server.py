@@ -1,7 +1,6 @@
 import numpy as np
 
 from baseline_constants import BYTES_WRITTEN_KEY, BYTES_READ_KEY, LOCAL_COMPUTATIONS_KEY
-from utils.model_utils import gen_frac_query
 
 class Server:
     
@@ -11,7 +10,7 @@ class Server:
         self.selected_clients = []
         self.updates = []
 
-    def select_clients(self, round, possible_clients, num_clients=20):
+    def select_clients(self, my_round, possible_clients, num_clients=20):
         """Selects num_clients clients randomly from possible_clients.
         
         Note that within function, num_clients is set to
@@ -24,7 +23,7 @@ class Server:
             list of (num_train_samples, num_test_samples)
         """
         num_clients = min(num_clients, len(possible_clients))
-        np.random.seed(round)
+        np.random.seed(my_round)
         self.selected_clients = np.random.choice(possible_clients, num_clients, replace=False)
 
         return [(c.num_train_samples, c.num_test_samples) for c in self.selected_clients]
@@ -67,24 +66,6 @@ class Server:
             self.updates.append((num_samples, update))
 
         return sys_metrics
-
-    def metatest_model(self, clients, query_fraction, num_epochs=1, batch_size=10):
-        metrics = {}
-
-        cur_model_params = self.model
-        for client in clients:
-            support, query = gen_frac_query(client.eval_data, query_fraction)
-
-            client.model.set_params(cur_model_params)
-            _, finetuned_model = client.model.finetune(support, num_epochs, batch_size)
-            client.model.set_params(finetuned_model)
-
-            c_metrics = client.test(query)
-            metrics[client.id] = c_metrics
-        self.model = cur_model_params
-        self.client_model.set_params(cur_model_params)
-
-        return metrics
 
     def update_model(self):
         total_weight = 0.
@@ -138,3 +119,13 @@ class Server:
         num_test_samples = {c.id: c.num_test_samples for c in clients}
         num_train_samples = {c.id: c.num_train_samples for c in clients}
         return ids, groups, num_train_samples, num_test_samples
+
+    def save_model(self, path):
+        """Saves the server model on checkpoints/dataset/model.ckpt."""
+        # Save server model
+        self.client_model.set_params(self.model)
+        model_sess =  self.client_model.sess
+        return self.client_model.saver.save(model_sess, path)
+
+    def close_model(self):
+        self.client_model.close()
