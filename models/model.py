@@ -14,13 +14,14 @@ from utils.tf_utils import graph_size
 
 class Model(ABC):
 
-    def __init__(self, lr):
+    def __init__(self, seed, lr, optimizer=None):
         self.lr = lr
-        self._optimizer = None
+        self._optimizer = optimizer
 
         self.graph = tf.Graph()
         with self.graph.as_default():
-            self.features, self.labels, self.train_op, self.eval_metric_ops = self.create_model()
+            tf.set_random_seed(123 + seed)
+            self.features, self.labels, self.train_op, self.eval_metric_ops, self.loss = self.create_model()
             self.saver = tf.train.Saver()
         self.sess = tf.Session(graph=self.graph)
 
@@ -32,6 +33,17 @@ class Model(ABC):
             metadata = tf.RunMetadata()
             opts = tf.profiler.ProfileOptionBuilder.float_operation()
             self.flops = tf.profiler.profile(self.graph, run_meta=metadata, cmd='scope', options=opts).total_float_ops
+
+    def set_params(self, model_params):
+        with self.graph.as_default():
+            all_vars = tf.trainable_variables()
+            for variable, value in zip(all_vars, model_params):
+                variable.load(value, self.sess)
+
+    def get_params(self):
+        with self.graph.as_default():
+            model_params = self.sess.run(tf.trainable_variables())
+        return model_params
 
     @property
     def optimizer(self):
@@ -69,24 +81,15 @@ class Model(ABC):
             update: List of np.ndarray weights, with each weight array
                 corresponding to a variable in the resulting graph
         """
-        with self.graph.as_default():
-            init_values = [self.sess.run(v) for v in tf.trainable_variables()]
-
-        batched_x, batched_y = batch_data(data, batch_size)
         for _ in range(num_epochs):
-            for i, raw_x_batch in enumerate(batched_x):
-                input_data = self.process_x(raw_x_batch)
-                raw_y_batch = batched_y[i]
-                target_data = self.process_y(raw_y_batch)
+            for batched_x, batched_y in batch_data(data, batch_size):
+                input_data = self.process_x(batched_x)
+                target_data = self.process_y(batched_y)
                 with self.graph.as_default():
-                    self.sess.run(
-                        self.train_op,
-                        feed_dict={self.features: input_data, self.labels: target_data}
-                    )
-        with self.graph.as_default():
-            update = [self.sess.run(v) for v in tf.trainable_variables()]
-            update = [np.subtract(update[i], init_values[i]) for i in range(len(update))]
-        comp = num_epochs * len(batched_y) * batch_size * self.flops
+                    self.sess.run(self.train_op,
+                        feed_dict={self.features: input_data, self.labels: target_data})
+        update = self.get_params()
+        comp = num_epochs * (len(data['y'])//batch_size) * batch_size * self.flops
         return comp, update
 
     def test(self, data):
@@ -101,23 +104,25 @@ class Model(ABC):
         x_vecs = self.process_x(data['x'])
         labels = self.process_y(data['y'])
         with self.graph.as_default():
-            tot_acc = self.sess.run(
-                self.eval_metric_ops,
+            tot_acc, loss = self.sess.run(
+                [self.eval_metric_ops, self.loss],
                 feed_dict={self.features: x_vecs, self.labels: labels}
             )
         acc = float(tot_acc) / x_vecs.shape[0]
-        return {ACCURACY_KEY: acc}
+        return {ACCURACY_KEY: acc, 'loss': loss}
 
     def close(self):
         self.sess.close()
 
+    @abstractmethod
     def process_x(self, raw_x_batch):
         """Pre-processes each batch of features before being fed to the model."""
-        return np.asarray(raw_x_batch)
+        pass
 
+    @abstractmethod
     def process_y(self, raw_y_batch):
         """Pre-processes each batch of labels before being fed to the model."""
-        return np.asarray(raw_y_batch)
+        pass
 
 
 class ServerModel:
@@ -162,7 +167,7 @@ class ServerModel:
 
         weighted_vals = [np.zeros(np.shape(v), dtype=float) for v in updates[0][1]]
 
-        for i, update in enumerate(updates):
+        for _, update in enumerate(updates):
             for j, weighted_val in enumerate(weighted_vals):
                 weighted_vals[j] = np.add(weighted_val, update[0] * update[1][j])
 

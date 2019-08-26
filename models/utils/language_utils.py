@@ -1,27 +1,29 @@
 """Utils for language models."""
 
-import json
-import numpy as np
 import re
+import numpy as np
+import json
 
 
 # ------------------------
 # utils for shakespeare dataset
 
-ALL_LETTERS = " ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+ALL_LETTERS = "\n !\"&'(),-.0123456789:;>?ABCDEFGHIJKLMNOPQRSTUVWXYZ[]abcdefghijklmnopqrstuvwxyz}"
 NUM_LETTERS = len(ALL_LETTERS)
 
 
 def _one_hot(index, size):
-    """Returns one-hot vector with given size and value 1 at given index."""
+    '''returns one-hot vector with given size and value 1 at given index
+    '''
     vec = [0 for _ in range(size)]
     vec[int(index)] = 1
     return vec
 
 
 def letter_to_vec(letter):
-    """Returns one-hot representation of given letter."""
-    index = max(0,ALL_LETTERS.find(letter)) # treating ' ' as unknown character
+    '''returns one-hot representation of given letter
+    '''
+    index = ALL_LETTERS.find(letter)
     return _one_hot(index, NUM_LETTERS)
 
 
@@ -36,7 +38,7 @@ def word_to_indices(word):
     '''
     indices = []
     for c in word:
-        indices.append(max(0, ALL_LETTERS.find(c))) # added max to account for -1
+        indices.append(ALL_LETTERS.find(c))
     return indices
 
 
@@ -45,34 +47,34 @@ def word_to_indices(word):
 
 
 def split_line(line):
-    """Split given line/phrase into list of words
+    '''split given line/phrase into list of words
 
     Args:
         line: string representing phrase to be split
     
     Return:
         list of strings, with each string representing a word
-    """
+    '''
     return re.findall(r"[\w']+|[.,!?;]", line)
 
 
 def _word_to_index(word, indd):
-    """Returns index of given word based on given lookup dictionary
+    '''returns index of given word based on given lookup dictionary
 
     returns the length of the lookup dictionary if word not found
 
     Args:
         word: string
         indd: dictionary with string words as keys and int indices as values
-    """
+    '''
     if word in indd:
         return indd[word]
     else:
         return len(indd)
 
 
-def line_to_indices(line, indd, max_words=25):
-    """Converts given phrase into list of word indices
+def line_to_indices(line, word2id, max_words=25):
+    '''converts given phrase into list of word indices
     
     if the phrase has more than max_words words, returns a list containing
     indices of the first max_words words
@@ -82,26 +84,21 @@ def line_to_indices(line, indd, max_words=25):
 
     Args:
         line: string representing phrase/sequence of words
-        indd: dictionary with string words as keys and int indices as values
+        word2id: dictionary with string words as keys and int indices as values
         max_words: maximum number of word indices in returned list
 
     Return:
         indl: list of word indices, one index for each word in phrase
-    """
+    '''
+    unk_id = len(word2id)
     line_list = split_line(line) # split phrase in words
-    indl = []
-    for word in line_list:
-        cind = _word_to_index(word, indd)
-        indl.append(cind)
-        if (len(indl) == max_words):
-            break
-    for i in range(max_words - len(indl)):
-        indl.append(len(indd))
+    indl = [word2id[w] if w in word2id else unk_id for w in line_list[:max_words]]
+    indl += [unk_id]*(max_words-len(indl))
     return indl
 
 
 def bag_of_words(line, vocab):
-    """Returns bag of words representation of given phrase using given vocab.
+    '''returns bag of words representation of given phrase using given vocab
 
     Args:
         line: string representing phrase to be parsed
@@ -109,7 +106,7 @@ def bag_of_words(line, vocab):
 
     Return:
         integer list
-    """
+    '''
     bag = [0]*len(vocab)
     words = split_line(line)
     for w in words:
@@ -143,4 +140,3 @@ def val_to_vec(size, val):
     vec = [0 for _ in range(size)]
     vec[int(val)] = 1
     return vec
-

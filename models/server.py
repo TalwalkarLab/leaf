@@ -1,17 +1,16 @@
-import random
-
+import numpy as np
 
 from baseline_constants import BYTES_WRITTEN_KEY, BYTES_READ_KEY, LOCAL_COMPUTATIONS_KEY
 
-
 class Server:
     
-    def __init__(self, model):
-        self.model = model  # global model of the server.
+    def __init__(self, client_model):
+        self.client_model = client_model
+        self.model = client_model.get_params()
         self.selected_clients = []
         self.updates = []
 
-    def select_clients(self, possible_clients, num_clients=20):
+    def select_clients(self, my_round, possible_clients, num_clients=20):
         """Selects num_clients clients randomly from possible_clients.
         
         Note that within function, num_clients is set to
@@ -24,9 +23,10 @@ class Server:
             list of (num_train_samples, num_test_samples)
         """
         num_clients = min(num_clients, len(possible_clients))
-        self.selected_clients = random.sample(possible_clients, num_clients)
+        np.random.seed(my_round)
+        self.selected_clients = np.random.choice(possible_clients, num_clients, replace=False)
 
-        return [(len(c.train_data['y']), len(c.eval_data['y'])) for c in self.selected_clients]
+        return [(c.num_train_samples, c.num_test_samples) for c in self.selected_clients]
 
     def train_model(self, num_epochs=1, batch_size=10, minibatch=None, clients=None):
         """Trains self.model on given clients.
@@ -56,18 +56,27 @@ class Server:
                    BYTES_READ_KEY: 0,
                    LOCAL_COMPUTATIONS_KEY: 0} for c in clients}
         for c in clients:
-            self.model.send_to([c])
-            sys_metrics[c.id][BYTES_READ_KEY] += self.model.size
-
+            c.model.set_params(self.model)
             comp, num_samples, update = c.train(num_epochs, batch_size, minibatch)
+
+            sys_metrics[c.id][BYTES_READ_KEY] += c.model.size
+            sys_metrics[c.id][BYTES_WRITTEN_KEY] += c.model.size
             sys_metrics[c.id][LOCAL_COMPUTATIONS_KEY] = comp
 
             self.updates.append((num_samples, update))
-            sys_metrics[c.id][BYTES_WRITTEN_KEY] += self.model.size
+
         return sys_metrics
 
     def update_model(self):
-        self.model.update(self.updates)
+        total_weight = 0.
+        base = [0] * len(self.updates[0][1])
+        for (client_samples, client_model) in self.updates:
+            total_weight += client_samples
+            for i, v in enumerate(client_model):
+                base[i] += (client_samples * v.astype(np.float64))
+        averaged_soln = [v / total_weight for v in base]
+
+        self.model = averaged_soln
         self.updates = []
 
     def test_model(self, clients_to_test=None):
@@ -82,15 +91,22 @@ class Server:
             clients_to_test = self.selected_clients
         metrics = {}
 
-        self.model.send_to(clients_to_test)
-        
+        self.client_model.set_params(self.model)
         for client in clients_to_test:
-            c_metrics = client.test(self.model.cur_model)
+            c_metrics = client.test()
             metrics[client.id] = c_metrics
 
         return metrics
 
-    def get_clients_test_info(self, clients=None):
+    def get_train_stats(self, clients):
+        metrics = {}
+        for client in clients:
+            client.model.set_params(self.model)
+            c_metrics = client.model.test(client.train_data)
+            metrics[client.id] = c_metrics
+        return metrics
+
+    def get_clients_info(self, clients):
         """Returns the ids, hierarchies and num_test_samples for the given clients.
 
         Returns info about self.selected_clients if clients=None;
@@ -98,9 +114,18 @@ class Server:
         Args:
             clients: list of Client objects.
         """
-        if clients is None:
-            clients = self.selected_clients
         ids = [c.id for c in clients]
         groups = {c.id: c.group for c in clients}
-        num_samples = {c.id: c.num_test_samples for c in clients}
-        return ids, groups, num_samples
+        num_test_samples = {c.id: c.num_test_samples for c in clients}
+        num_train_samples = {c.id: c.num_train_samples for c in clients}
+        return ids, groups, num_train_samples, num_test_samples
+
+    def save_model(self, path):
+        """Saves the server model on checkpoints/dataset/model.ckpt."""
+        # Save server model
+        self.client_model.set_params(self.model)
+        model_sess =  self.client_model.sess
+        return self.client_model.saver.save(model_sess, path)
+
+    def close_model(self):
+        self.client_model.close()
