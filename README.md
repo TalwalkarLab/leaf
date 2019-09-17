@@ -31,6 +31,12 @@
   * **Details:** 9343 users (we exclude celebrities with less than 5 images)
   * **Task:** Image Classification (Smiling vs. Not smiling)
 
+5. Synthetic Dataset
+
+  * **Overview:** We propose a process to generate synthetic, challenging federated datasets. The high-level goal is to create devices whose true models are device-dependant. To see a description of the whole generative process, please refer to the paper
+  * **Details:** The user can customize the number of devices, the number of classes and the number of dimensions, among others
+  * **Task:** Classification
+
 ## Notes
 
 - Install the libraries listed in ```requirements.txt```

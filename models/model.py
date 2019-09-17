@@ -82,15 +82,24 @@ class Model(ABC):
                 corresponding to a variable in the resulting graph
         """
         for _ in range(num_epochs):
-            for batched_x, batched_y in batch_data(data, batch_size):
-                input_data = self.process_x(batched_x)
-                target_data = self.process_y(batched_y)
-                with self.graph.as_default():
-                    self.sess.run(self.train_op,
-                        feed_dict={self.features: input_data, self.labels: target_data})
+            self.run_epoch(data, batch_size)
+
         update = self.get_params()
         comp = num_epochs * (len(data['y'])//batch_size) * batch_size * self.flops
         return comp, update
+
+    def run_epoch(self, data, batch_size):
+        for batched_x, batched_y in batch_data(data, batch_size):
+            
+            input_data = self.process_x(batched_x)
+            target_data = self.process_y(batched_y)
+            
+            with self.graph.as_default():
+                self.sess.run(self.train_op,
+                    feed_dict={
+                        self.features: input_data,
+                        self.labels: target_data
+                    })
 
     def test(self, data):
         """

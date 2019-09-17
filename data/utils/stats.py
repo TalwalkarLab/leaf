@@ -68,9 +68,10 @@ def print_dataset_stats(name):
         bins = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500]
     if args.name == 'celeba':
         bins = [2 * i for i in range(20)]
+    if args.name == 'sent140':
+        bins = [i for i in range(16)]
 
-    hist, edges = np.histogram(num_samples,bins=bins)
-    print("\nnum_sam\tnum_users")
+    hist, edges = np.histogram(num_samples, bins=bins)
     for e, h in zip(edges, hist):
         print(e, "\t", h)
 
@@ -82,7 +83,7 @@ def print_dataset_stats(name):
     fig_dir = os.path.join(data_dir, fig_name)
     plt.savefig(fig_dir)
     plt.title(name)
-    plt.xlabel("number of samples")
+    plt.xlabel('number of samples')
     plt.ylabel("number of users")
     fig_name = "%s_hist.png" % name
     fig_dir = os.path.join(data_dir, fig_name)

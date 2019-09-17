@@ -1,12 +1,13 @@
-# CelebA Dataset
+# Synthetic Dataset
 
-Our task is to determine whether the celebrity in the image is smiling. This can be easily changed to any of the binary attributes provided by the original CelebA project by modifying the TARGET_NAME constant in ```preprocess/metadata_to_json```. We have ignored all celebrities with less than 5 images in our pipeline.
+We propose a process to generate synthetic federated datasets. The dataset is inspired by the one presented by [Li et al.](https://arxiv.org/abs/1905.10497), but has possible additional heterogeneity designed to make current meta-learning methods (such as [Reptile](https://openai.com/blog/reptile/)) struggle. The high-level goal is to create tasks whose true models are (1) task-dependant, and (2) clustered around more than just one center. To see a description of the whole generative process, please refer to the Leaf paper.
+
+We note that, at the moment, we default to one cluster of models in our code. This can be easily changed by modifying the PROB_CLUSTERS constant in ```main.py```.
 
 ## Setup Instructions
 - pip3 install numpy
 - pip3 install pillow
-- From <http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html>, download or request the metadata files ```identity_CelebA.txt``` and ```list_attr_celeba.txt```, and place them inside the ```data/raw``` folder.
-- Download the celebrity faces dataset from the same site. Place the images in a folder named ```img_align_celeba``` in the same folder as above.
+- Run ```python main.py -num-tasks 1000 -num-classes 5 -num-dim 60``` to generate the initial data.
 - Run ```./preprocess.sh``` with a choice of the following tags:
     - ```-s``` := 'iid' to sample in an i.i.d. manner, or 'niid' to sample in a non-i.i.d. manner; more information on i.i.d. versus non-i.i.d. is included in the 'Notes' section
     - ```--iu``` := number of users, if iid sampling; expressed as a fraction of the total number of users; default is 0.01
@@ -18,8 +19,7 @@ Our task is to determine whether the celebrity in the image is smiling. This can
     - ```--spltseed``` :=  seed to be used before random split of data
 
 i.e.
-- ```./preprocess.sh -s niid --sf 1.0 -k 5 -t sample``` (full-sized dataset)<br/>
-- ```./preprocess.sh -s niid --sf 0.05 -k 5 -t sample``` (small-sized dataset)
+- ```./preprocess.sh -s niid --sf 1.0 -k 5 -t sample --tf 0.6```
 
 Make sure to delete the rem_user_data, sampled_data, test, and train subfolders in the data directory before re-running preprocess.sh
 
