@@ -25,6 +25,12 @@
   * **Details:** 2288 users
   * **Task:** Next-Character Prediction
 
+4. Celeba
+
+  * **Overview:** Image Dataset based on the [Large-scale CelebFaces Attributes Dataset](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html)
+  * **Details:** 9343 users (we exclude celebrities with less than 5 images)
+  * **Task:** Image Classification (Smiling vs. Not smiling)
+
 ## Notes
 
 - Install the libraries listed in ```requirements.txt```
