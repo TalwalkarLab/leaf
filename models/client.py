@@ -32,7 +32,7 @@ class Client:
             frac = min(1.0, minibatch)
             num_data = max(1, int(frac*len(self.train_data["x"])))
             xs, ys = zip(*random.sample(list(zip(self.train_data["x"], self.train_data["y"])), num_data))
-            data = {"x": xs, "y": ys}
+            data = {'x': xs, 'y': ys}
 
             # Minibatch trains for only 1 epoch - multiple local epochs don't make sense!
             num_epochs = 1
@@ -40,13 +40,18 @@ class Client:
         num_train_samples = len(data['y'])
         return comp, num_train_samples, update
 
-    def test(self, data=None):
-        """Tests self.model on self.eval_data.
-
+    def test(self, set_to_use='test'):
+        """Tests self.model on self.test_data.
+        
+        Args:
+            set_to_use. Set to test on. Should be in ['train', 'test'].
         Return:
             dict of metrics returned by the model.
         """
-        if data is None:
+        assert set_to_use in ['train', 'test']
+        if set_to_use == 'train':
+            data = self.train_data
+        elif set_to_use == 'test':
             data = self.eval_data
         return self.model.test(data)
 
@@ -63,14 +68,30 @@ class Client:
 
     @property
     def num_train_samples(self):
-        """Number of test samples for this client.
+        """Number of train samples for this client.
 
         Return:
-            int: Number of test samples for this client
+            int: Number of train samples for this client
         """
         if self.train_data is None:
             return 0
         return len(self.train_data['y'])
+
+    @property
+    def num_samples(self):
+        """Number samples for this client.
+
+        Return:
+            int: Number of samples for this client
+        """
+        train_size = 0
+        if self.train_data is not None:
+            train_size = len(self.train_data['y'])
+
+        test_size = 0 
+        if self.eval_data is not  None:
+            test_size = len(self.eval_data['y'])
+        return train_size + test_size
 
     @property
     def model(self):

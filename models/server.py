@@ -79,46 +79,42 @@ class Server:
         self.model = averaged_soln
         self.updates = []
 
-    def test_model(self, clients_to_test=None):
+    def test_model(self, clients_to_test, set_to_use='test'):
         """Tests self.model on given clients.
 
         Tests model on self.selected_clients if clients_to_test=None.
 
         Args:
             clients_to_test: list of Client objects.
+            set_to_use: dataset to test on. Should be in ['train', 'test'].
         """
+        metrics = {}
+
         if clients_to_test is None:
             clients_to_test = self.selected_clients
-        metrics = {}
 
-        self.client_model.set_params(self.model)
         for client in clients_to_test:
-            c_metrics = client.test()
-            metrics[client.id] = c_metrics
-
-        return metrics
-
-    def get_train_stats(self, clients):
-        metrics = {}
-        for client in clients:
             client.model.set_params(self.model)
-            c_metrics = client.model.test(client.train_data)
+            c_metrics = client.test(set_to_use)
             metrics[client.id] = c_metrics
+        
         return metrics
 
     def get_clients_info(self, clients):
-        """Returns the ids, hierarchies and num_test_samples for the given clients.
+        """Returns the ids, hierarchies and num_samples for the given clients.
 
         Returns info about self.selected_clients if clients=None;
 
         Args:
             clients: list of Client objects.
         """
+        if clients is None:
+            clients = self.selected_clients
+
         ids = [c.id for c in clients]
         groups = {c.id: c.group for c in clients}
-        num_test_samples = {c.id: c.num_test_samples for c in clients}
-        num_train_samples = {c.id: c.num_train_samples for c in clients}
-        return ids, groups, num_train_samples, num_test_samples
+        num_samples = {c.id: c.num_samples for c in clients}
+        return ids, groups, num_samples
 
     def save_model(self, path):
         """Saves the server model on checkpoints/dataset/model.ckpt."""

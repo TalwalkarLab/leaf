@@ -12,7 +12,7 @@ from baseline_constants import CLIENT_ID_KEY, NUM_ROUND_KEY, NUM_SAMPLES_KEY
 
 
 COLUMN_NAMES = [
-    CLIENT_ID_KEY, NUM_ROUND_KEY, 'hierarchy', NUM_SAMPLES_KEY]
+    CLIENT_ID_KEY, NUM_ROUND_KEY, 'hierarchy', NUM_SAMPLES_KEY, 'set']
 
 
 def print_metrics(
@@ -21,7 +21,9 @@ def print_metrics(
         metrics,
         hierarchies,
         num_samples,
-        path):
+        partition,
+        metrics_dir, 
+        metrics_name):
     """Prints or appends the given metrics in a csv.
 
     The resulting dataframe is of the form:
@@ -41,7 +43,13 @@ def print_metrics(
             to which the client belongs.
         num_samples: Dict keyed by client id. Each element is the number of test
             samples for the client.
+        partition: String. Value of the 'set' column.
+        metrics_dir: String. Directory for the metrics file. May not exist.
+        metrics_name: String. Filename for the metrics file. May not exist.
     """
+    os.makedirs(metrics_dir, exist_ok=True)
+    path = os.path.join(metrics_dir, '{}.csv'.format(metrics_name))
+    
     columns = COLUMN_NAMES + get_metrics_names(metrics)
     client_data = pd.DataFrame(columns=columns)
     for i, c_id in enumerate(client_ids):
@@ -49,7 +57,8 @@ def print_metrics(
             'client_id': c_id,
             'round_number': round_number,
             'hierarchy': ','.join(hierarchies.get(c_id, [])),
-            'num_samples': num_samples.get(c_id, np.nan)
+            'num_samples': num_samples.get(c_id, np.nan),
+            'set': partition,
         }
 
         current_metrics = metrics.get(c_id, {})

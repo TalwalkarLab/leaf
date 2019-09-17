@@ -66,7 +66,7 @@ class Model(ABC):
                 eval_metric_ops: A Tensorflow operation that, when run with features and labels,
                     returns the accuracy of the model.
         """
-        return None, None, None, None
+        return None, None, None, None, None
 
     def train(self, data, num_epochs=1, batch_size=10):
         """
@@ -154,30 +154,6 @@ class ServerModel:
                 all_vars = tf.trainable_variables()
                 for v in all_vars:
                     v.load(var_vals[v.name], c.model.sess)
-
-    def update(self, updates):
-        """Updates server model using given client updates.
-
-        Args:
-            updates: list of (num_samples, update), where num_samples is the
-                number of training samples corresponding to the update, and update
-                is a list of variable weights
-        """
-        tot_samples = np.sum([u[0] for u in updates])
-
-        weighted_vals = [np.zeros(np.shape(v), dtype=float) for v in updates[0][1]]
-
-        for _, update in enumerate(updates):
-            for j, weighted_val in enumerate(weighted_vals):
-                weighted_vals[j] = np.add(weighted_val, update[0] * update[1][j])
-
-        weighted_updates = [v / tot_samples for v in weighted_vals]
-
-        with self.model.graph.as_default():
-            all_vars = tf.trainable_variables()
-            for i, v in enumerate(all_vars):
-                init_val = self.model.sess.run(v)
-                v.load(np.add(init_val, weighted_updates[i]), self.model.sess)
 
     def save(self, path='checkpoints/model.ckpt'):
         return self.model.saver.save(self.model.sess, path)

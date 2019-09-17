@@ -35,6 +35,16 @@ def parse_args():
                     help='seed for random client sampling and batch splitting',
                     type=int,
                     default=0)
+    parser.add_argument('--metrics-name', 
+                    help='name for metrics file;',
+                    type=str,
+                    default='metrics',
+                    required=False)
+    parser.add_argument('--metrics-dir', 
+                    help='dir for metrics file;',
+                    type=str,
+                    default='metrics',
+                    required=False)
 
     # Minibatch doesn't support num_epochs, so make them mutually exclusive
     epoch_capability_group = parser.add_mutually_exclusive_group()
