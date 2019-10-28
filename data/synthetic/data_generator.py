@@ -1,5 +1,8 @@
 import numpy as np
 
+from scipy.special import softmax
+
+
 NUM_DIM = 10
 
 class SyntheticDataset:
@@ -8,7 +11,7 @@ class SyntheticDataset:
             self,
             num_classes=2,
             seed=931231,
-            num_dim=10,
+            num_dim=NUM_DIM,
             prob_clusters=[0.5, 0.5]):
 
         np.random.seed(seed)
@@ -53,16 +56,13 @@ class SyntheticDataset:
 
         return samples
 
-    def _softmax(self, x):
-        return np.exp(x) / sum(np.exp(x))
-
     def _generate_y(self, x, cluster_mean):
         model_info = np.random.normal(loc=cluster_mean, scale=0.1, size=cluster_mean.shape)
         w = np.matmul(self.Q, model_info)
         
         num_samples = x.shape[0]
-        prob = self._softmax(np.matmul(x, w) + np.random.normal(loc=0., scale=0.1, size=(num_samples, self.num_classes)))
-
+        prob = softmax(np.matmul(x, w) + np.random.normal(loc=0., scale=0.1, size=(num_samples, self.num_classes)), axis=1)
+                
         y = np.argmax(prob, axis=1)
         return y, w, model_info
 
