@@ -33,6 +33,6 @@ Make sure to delete the rem_user_data, sampled_data, test, and train subfolders 
 - Each .json file is an object with 3 keys:
   1. 'users', a list of users
   2. 'num_samples', a list of the number of samples for each user, and 
-  3. 'user_data', an object with user names as keys and their respective data as values; for each user, data is represented as a list of images, with each image represented as a size-784 integer list (flattened from 28 by 28)
+  3. 'user_data', an object with user names as keys and their respective data as values.
 - Run ```./stats.sh``` to get statistics of data (data/all_data/all_data.json must have been generated already)
 - In order to run reference implementations in ```../models``` directory, the ```-t sample``` tag must be used when running ```./preprocess.sh```
