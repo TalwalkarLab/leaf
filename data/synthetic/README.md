@@ -1,6 +1,6 @@
 # Synthetic Dataset
 
-We propose a process to generate synthetic federated datasets. The dataset is inspired by the one presented by [Li et al.](https://arxiv.org/abs/1905.10497), but has possible additional heterogeneity designed to make current meta-learning methods (such as [Reptile](https://openai.com/blog/reptile/)) struggle. The high-level goal is to create tasks whose true models are (1) task-dependant, and (2) clustered around more than just one center. To see a description of the whole generative process, please refer to the Leaf paper.
+We propose a process to generate synthetic federated datasets. The dataset is inspired by the one presented by [Li et al.](https://arxiv.org/abs/1905.10497), but has possible additional heterogeneity designed to make current meta-learning methods (such as [Reptile](https://openai.com/blog/reptile/)) struggle. The high-level goal is to create tasks whose true models are (1) task-dependant, and (2) clustered around more than just one center. To see a description of the whole generative process, please refer to the LEAF paper.
 
 We note that, at the moment, we default to one cluster of models in our code. This can be easily changed by modifying the PROB_CLUSTERS constant in ```main.py```.
 
