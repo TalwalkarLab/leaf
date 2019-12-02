@@ -22,7 +22,7 @@
 3. Shakespeare
 
   * **Overview:** Text Dataset of Shakespeare Dialogues
-  * **Details:** 2288 users
+  * **Details:** 1129 users
   * **Task:** Next-Character Prediction
 
 4. Celeba
