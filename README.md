@@ -1,4 +1,4 @@
-# Leaf: A Benchmark for Federated Settings
+# LEAF: A Benchmark for Federated Settings
 
 ## Resources
 

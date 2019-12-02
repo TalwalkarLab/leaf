@@ -8,7 +8,7 @@
 Welcome to LEAF's documentation!
 ################################
 
-Leaf is a benchmarking framework for learning in federated settings, with applications including federated learning, multi-task learning, meta-learning, and on-device learning.
+LEAF is a benchmarking framework for learning in federated settings, with applications including federated learning, multi-task learning, meta-learning, and on-device learning.
 
 See the source code repository on GitHub: https://github.com/TalwalkarLab/leaf
 
