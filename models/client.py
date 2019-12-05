@@ -48,10 +48,10 @@ class Client:
         Return:
             dict of metrics returned by the model.
         """
-        assert set_to_use in ['train', 'test']
+        assert set_to_use in ['train', 'test', 'val']
         if set_to_use == 'train':
             data = self.train_data
-        elif set_to_use == 'test':
+        elif set_to_use == 'test' or set_to_use == 'val':
             data = self.eval_data
         return self.model.test(data)
 

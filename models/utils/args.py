@@ -46,6 +46,9 @@ def parse_args():
                     type=str,
                     default='metrics',
                     required=False)
+    parser.add_argument('--use-val-set', 
+                    help='use validation set;', 
+                    action='store_true')
 
     # Minibatch doesn't support num_epochs, so make them mutually exclusive
     epoch_capability_group = parser.add_mutually_exclusive_group()

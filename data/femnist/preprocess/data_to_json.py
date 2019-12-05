@@ -44,17 +44,17 @@ writers = util.load_obj(by_writer_dir)
 
 num_json = int(math.ceil(len(writers) / MAX_WRITERS))
 
-users = [[] for _ in range(num_json)]
-num_samples = [[] for _ in range(num_json)]
-user_data = [{} for _ in range(num_json)]
+users = []
+num_samples = []
+user_data = {}
 
 writer_count = 0
 json_index = 0
 for (w, l) in writers:
 
-    users[json_index].append(w)
-    num_samples[json_index].append(len(l))
-    user_data[json_index][w] = {'x': [], 'y': []}
+    users.append(w)
+    num_samples.append(len(l))
+    user_data[w] = {'x': [], 'y': []}
 
     size = 28, 28  # original image size is 128, 128
     for (f, c) in l:
@@ -69,16 +69,16 @@ for (w, l) in writers:
 
         nc = relabel_class(c)
 
-        user_data[json_index][w]['x'].append(vec)
-        user_data[json_index][w]['y'].append(nc)
+        user_data[w]['x'].append(vec)
+        user_data[w]['y'].append(nc)
 
     writer_count += 1
     if writer_count == MAX_WRITERS:
 
         all_data = {}
-        all_data['users'] = users[json_index]
-        all_data['num_samples'] = num_samples[json_index]
-        all_data['user_data'] = user_data[json_index]
+        all_data['users'] = users
+        all_data['num_samples'] = num_samples
+        all_data['user_data'] = user_data
 
         file_name = 'all_data_%d.json' % json_index
         file_path = os.path.join(parent_path, 'data', 'all_data', file_name)
@@ -90,3 +90,7 @@ for (w, l) in writers:
 
         writer_count = 0
         json_index += 1
+        
+        users[:] = []
+        num_samples[:] = []
+        user_data.clear()
