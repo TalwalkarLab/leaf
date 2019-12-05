@@ -37,6 +37,12 @@
   * **Details:** The user can customize the number of devices, the number of classes and the number of dimensions, among others
   * **Task:** Classification
 
+6. Reddit
+
+  * **Overview:** We preprocess the Reddit data released by [pushshift.io](https://files.pushshift.io/reddit/) corresponding to December 2017.
+  * **Details:** 1,660,820 users with a total of 56,587,343 comments. 
+  * **Task:** Next-word Prediction.
+
 ## Notes
 
 - Install the libraries listed in ```requirements.txt```

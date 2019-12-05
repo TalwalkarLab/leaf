@@ -6,7 +6,7 @@ class Client:
     
     def __init__(self, client_id, group=None, train_data={'x' : [],'y' : []}, eval_data={'x' : [],'y' : []}, model=None):
         self._model = model
-        self.id = client_id # integer
+        self.id = client_id
         self.group = group
         self.train_data = train_data
         self.eval_data = eval_data

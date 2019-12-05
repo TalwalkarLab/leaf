@@ -16,11 +16,12 @@ class Model(ABC):
 
     def __init__(self, seed, lr, optimizer=None):
         self.lr = lr
+        self.seed = seed
         self._optimizer = optimizer
 
         self.graph = tf.Graph()
         with self.graph.as_default():
-            tf.set_random_seed(123 + seed)
+            tf.set_random_seed(123 + self.seed)
             self.features, self.labels, self.train_op, self.eval_metric_ops, self.loss = self.create_model()
             self.saver = tf.train.Saver()
         self.sess = tf.Session(graph=self.graph)
@@ -33,6 +34,8 @@ class Model(ABC):
             metadata = tf.RunMetadata()
             opts = tf.profiler.ProfileOptionBuilder.float_operation()
             self.flops = tf.profiler.profile(self.graph, run_meta=metadata, cmd='scope', options=opts).total_float_ops
+
+        np.random.seed(self.seed)
 
     def set_params(self, model_params):
         with self.graph.as_default():
@@ -89,7 +92,8 @@ class Model(ABC):
         return comp, update
 
     def run_epoch(self, data, batch_size):
-        for batched_x, batched_y in batch_data(data, batch_size):
+
+        for batched_x, batched_y in batch_data(data, batch_size, seed=self.seed):
             
             input_data = self.process_x(batched_x)
             target_data = self.process_y(batched_y)

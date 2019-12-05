@@ -4,7 +4,7 @@ import os
 from collections import defaultdict
 
 
-def batch_data(data, batch_size):
+def batch_data(data, batch_size, seed):
     '''
     data is a dict := {'x': [numpy array], 'y': [numpy array]} (on one client)
     returns x, y, which are both numpy array of length: batch_size
@@ -13,7 +13,7 @@ def batch_data(data, batch_size):
     data_y = data['y']
 
     # randomly shuffle data
-    np.random.seed(100)
+    np.random.seed(seed)
     rng_state = np.random.get_state()
     np.random.shuffle(data_x)
     np.random.set_state(rng_state)

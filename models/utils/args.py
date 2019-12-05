@@ -1,6 +1,7 @@
 import argparse
 
-from .constants import DATASETS, SIM_TIMES
+DATASETS = ['sent140', 'femnist', 'shakespeare', 'celeba', 'synthetic', 'reddit']
+SIM_TIMES = ['small', 'medium', 'large']
 
 
 def parse_args():
