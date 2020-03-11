@@ -22,7 +22,7 @@
 3. Shakespeare
 
   * **Overview:** Text Dataset of Shakespeare Dialogues
-  * **Details:** 1129 users
+  * **Details:** 1129 users (reduced to 660 with our choice of sequence length. See [bug](https://github.com/TalwalkarLab/leaf/issues/19).)
   * **Task:** Next-Character Prediction
 
 4. Celeba
