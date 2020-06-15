@@ -48,4 +48,5 @@
 - Install the libraries listed in ```requirements.txt```
     - I.e. with pip: run ```pip3 install -r requirements.txt```
 - Go to directory of respective dataset for instructions on generating data
+    - in MacOS check if ```wget``` is installed and working
 - ```models``` directory contains instructions on running baseline reference implementations
