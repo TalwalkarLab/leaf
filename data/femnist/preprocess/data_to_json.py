@@ -73,7 +73,7 @@ for (w, l) in writers:
         user_data[w]['y'].append(nc)
 
     writer_count += 1
-    if writer_count == MAX_WRITERS:
+    if writer_count == MAX_WRITERS or writer_count == len(writers):
 
         all_data = {}
         all_data['users'] = users
