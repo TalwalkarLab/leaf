@@ -48,7 +48,7 @@ users = []
 num_samples = []
 user_data = {}
 
-writer_count = 0
+writer_count, all_writers = 0, 0
 json_index = 0
 for (w, l) in writers:
 
@@ -73,7 +73,9 @@ for (w, l) in writers:
         user_data[w]['y'].append(nc)
 
     writer_count += 1
-    if writer_count == MAX_WRITERS:
+    all_writers += 1
+    
+    if writer_count == MAX_WRITERS or all_writers == len(writers):
 
         all_data = {}
         all_data['users'] = users
