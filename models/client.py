@@ -32,7 +32,7 @@ class Client:
             frac = min(1.0, minibatch)
             num_data = max(1, int(frac*len(self.train_data["x"])))
             xs, ys = zip(*random.sample(list(zip(self.train_data["x"], self.train_data["y"])), num_data))
-            data = {'x': xs, 'y': ys}
+            data = {'x': list(xs), 'y': list(ys)}
 
             # Minibatch trains for only 1 epoch - multiple local epochs don't make sense!
             num_epochs = 1
