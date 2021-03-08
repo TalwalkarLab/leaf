@@ -1,10 +1,16 @@
 import random
 import warnings
+import importlib
 
 
 class Client:
-    
-    def __init__(self, client_id, group=None, train_data={'x' : [],'y' : []}, eval_data={'x' : [],'y' : []}, model=None):
+
+    def __init__(self, client_id, group=None, train_data={'x': [], 'y': []}, eval_data={'x': [], 'y': []}, model=None):
+        model_path = 'femnist.cnn'
+        mod = importlib.import_module(model_path)
+        ClientModel = getattr(mod, 'ClientModel')
+        model = ClientModel(123, *(0.06, 62))
+
         self._model = model
         self.id = client_id
         self.group = group
@@ -30,12 +36,13 @@ class Client:
             comp, update = self.model.train(data, num_epochs, batch_size)
         else:
             frac = min(1.0, minibatch)
-            num_data = max(1, int(frac*len(self.train_data["x"])))
+            num_data = max(1, int(frac * len(self.train_data["x"])))
             xs, ys = zip(*random.sample(list(zip(self.train_data["x"], self.train_data["y"])), num_data))
             data = {'x': list(xs), 'y': list(ys)}
 
             # Minibatch trains for only 1 epoch - multiple local epochs don't make sense!
             num_epochs = 1
+            print(id(self.model))
             comp, update = self.model.train(data, num_epochs, num_data)
         num_train_samples = len(data['y'])
         return comp, num_train_samples, update
@@ -88,8 +95,8 @@ class Client:
         if self.train_data is not None:
             train_size = len(self.train_data['y'])
 
-        test_size = 0 
-        if self.eval_data is not  None:
+        test_size = 0
+        if self.eval_data is not None:
             test_size = len(self.eval_data['y'])
         return train_size + test_size
 
