@@ -1,11 +1,19 @@
 import numpy as np
+import importlib
 
 from baseline_constants import BYTES_WRITTEN_KEY, BYTES_READ_KEY, LOCAL_COMPUTATIONS_KEY
 
 
 class Server:
 
-    def __init__(self, client_model):
+    def __init__(self, model_info):
+        model_path = model_info['model_path']
+        seed = model_info['seed']
+        model_params = model_info['model_params']
+        mod = importlib.import_module(model_path)
+        ClientModel = getattr(mod, 'ClientModel')
+        client_model = ClientModel(seed, *model_params)
+
         self.client_model = client_model
         self.model = client_model.get_params()
         self.selected_clients = []

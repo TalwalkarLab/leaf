@@ -1,15 +1,23 @@
 import random
 import warnings
 import importlib
+import copy
 
 
 class Client:
 
-    def __init__(self, client_id, group=None, train_data={'x': [], 'y': []}, eval_data={'x': [], 'y': []}, model=None):
-        model_path = 'femnist.cnn'
+    def __init__(self, client_id, group=None, train_data={'x': [], 'y': []}, eval_data={'x': [], 'y': []},
+                 model_info=None):
+        model_path = model_info['model_path']
+        seed = model_info['seed']
+        model_params = model_info['model_params']
         mod = importlib.import_module(model_path)
         ClientModel = getattr(mod, 'ClientModel')
-        model = ClientModel(123, *(0.06, 62))
+        model = ClientModel(seed, *model_params)
+        # model_path = 'femnist.cnn'
+        # mod = importlib.import_module(model_path)
+        # ClientModel = getattr(mod, 'ClientModel')
+        # model = ClientModel(123, *(0.06, 62))
 
         self._model = model
         self.id = client_id
