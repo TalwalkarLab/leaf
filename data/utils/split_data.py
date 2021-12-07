@@ -140,7 +140,6 @@ if (args.user):
             # Load data into an OrderedDict, to prevent ordering changes
             # and enable reproducibility
             data = json.load(inf, object_pairs_hook=OrderedDict)
-        else:
             user_files.extend([(u, ns, f) for (u, ns) in
                 zip(data['users'], data['num_samples'])])
 
