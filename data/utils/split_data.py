@@ -22,10 +22,7 @@ def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
     user_data = {}
     prev_dir = None
     for (i, t) in enumerate(user_files):
-        if include_hierarchy:
-            (u, h, ns, f) = t
-        else:
-            (u, ns, f) = t
+        (u, ns, f) = t
 
         file_dir = os.path.join(subdir, f)
         if prev_dir != file_dir:
@@ -34,8 +31,6 @@ def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
             prev_dir = file_dir
 
         users.append(u)
-        if include_hierarchy:
-            hierarchies.append(h)
         num_samples.append(ns)
         user_data[u] = data['user_data'][u]
         user_count += 1
@@ -44,8 +39,6 @@ def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
 
         all_data = {}
         all_data['users'] = users
-        if include_hierarchy:
-            all_data['hierarchies'] = hierarchies
         all_data['num_samples'] = num_samples
         all_data['user_data'] = user_data
 
@@ -67,8 +60,6 @@ def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
         user_count = 0
         json_index += 1
         users = []
-        if include_hierarchy:
-            hierarchies = []
         num_samples = []
         user_data = {}
 
@@ -149,9 +140,6 @@ if (args.user):
             # Load data into an OrderedDict, to prevent ordering changes
             # and enable reproducibility
             data = json.load(inf, object_pairs_hook=OrderedDict)
-        if include_hierarchy:
-            user_files.extend([(u, h, ns, f) for (u, h, ns) in
-                zip(data['users'], data['hierarchies'], data['num_samples'])])
         else:
             user_files.extend([(u, ns, f) for (u, ns) in
                 zip(data['users'], data['num_samples'])])
@@ -249,12 +237,6 @@ else:
         all_data_test['users'] = users
         all_data_test['num_samples'] = num_samples_test
         all_data_test['user_data'] = user_data_test
-
-        if include_hierarchy:
-            hierarchies = [data['hierarchies'][i] for i in user_indices]
-            all_data_train['hierarchies'] = hierarchies
-            all_data_test['hierarchies'] = hierarchies
-
         file_name_train = '%s_train_%s.json' % ((f[:-5]), arg_label)
         file_name_test = '%s_test_%s.json' % ((f[:-5]), arg_label)
         ouf_dir_train = os.path.join(dir, 'train', file_name_train)
