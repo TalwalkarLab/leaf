@@ -20,11 +20,14 @@ class Model(ABC):
         self._optimizer = optimizer
 
         self.graph = tf.Graph()
+
+        self.sess = tf.Session(graph=self.graph)
+
         with self.graph.as_default():
             tf.set_random_seed(123 + self.seed)
-            self.features, self.labels, self.train_op, self.eval_metric_ops, self.loss = self.create_model()
+            # self.features, self.labels, self.train_op, self.eval_metric_ops, self.loss = self.create_model()
+            self.features, self.labels, self.train_op, self.eval_metric_ops, self.loss = self.create_fedsp_model()
             self.saver = tf.train.Saver()
-        self.sess = tf.Session(graph=self.graph)
 
         self.size = graph_size(self.graph)
 
@@ -42,6 +45,15 @@ class Model(ABC):
             all_vars = tf.trainable_variables()
             for variable, value in zip(all_vars, model_params):
                 variable.load(value, self.sess)
+
+    # todo (tdye)
+    # model_params是全部参数，只加载global encoder那部分的参数
+    def set_global_params(self, model_params):
+        with self.graph.as_default():
+            all_vars = tf.trainable_variables()
+            for variable, value in zip(all_vars, model_params):
+                if variable.name.startswith('global'):
+                    variable.load(value, self.sess)
 
     def get_params(self):
         with self.graph.as_default():
@@ -71,6 +83,10 @@ class Model(ABC):
         """
         return None, None, None, None, None
 
+    @staticmethod
+    def create_fedsp_model(self):
+        return None, None, None, None, None
+
     def train(self, data, num_epochs=1, batch_size=10):
         """
         Trains the client model.
@@ -88,22 +104,22 @@ class Model(ABC):
             self.run_epoch(data, batch_size)
 
         update = self.get_params()
-        comp = num_epochs * (len(data['y'])//batch_size) * batch_size * self.flops
+        comp = num_epochs * (len(data['y']) // batch_size) * batch_size * self.flops
         return comp, update
 
+    # self.features 和 self.labels 是 placeholder
     def run_epoch(self, data, batch_size):
-
+        # batch_data没有起到打乱数据的作用，seed应该加上轮数，或者其他
         for batched_x, batched_y in batch_data(data, batch_size, seed=self.seed):
-            
             input_data = self.process_x(batched_x)
             target_data = self.process_y(batched_y)
-            
+
             with self.graph.as_default():
                 self.sess.run(self.train_op,
-                    feed_dict={
-                        self.features: input_data,
-                        self.labels: target_data
-                    })
+                              feed_dict={
+                                  self.features: input_data,
+                                  self.labels: target_data
+                              })
 
     def test(self, data):
         """
@@ -124,6 +140,7 @@ class Model(ABC):
         acc = float(tot_acc) / x_vecs.shape[0]
         return {ACCURACY_KEY: acc, 'loss': loss}
 
+    # todo session关闭后所有的变量都会消失，所以不会导致GPU内存一直上升？
     def close(self):
         self.sess.close()
 
@@ -150,6 +167,7 @@ class ServerModel:
     def cur_model(self):
         return self.model
 
+    # todo 修改下发参数的方式
     def send_to(self, clients):
         """Copies server model variables to each of the given clients
 

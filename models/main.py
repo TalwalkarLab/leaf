@@ -5,6 +5,7 @@ import numpy as np
 import os
 import sys
 import random
+import copy
 import tensorflow as tf
 
 import metrics.writer as metrics_writer
@@ -17,11 +18,11 @@ from model import ServerModel
 from utils.args import parse_args
 from utils.model_utils import read_data
 
-STAT_METRICS_PATH = 'metrics/stat_metrics.csv'
-SYS_METRICS_PATH = 'metrics/sys_metrics.csv'
+STAT_METRICS_PATH = 'metrics/metrics_stat.csv'
+SYS_METRICS_PATH = 'metrics/metrics_sys.csv'
+
 
 def main():
-
     args = parse_args()
 
     # Set the random seed if provided (affects client sampling, and batching)
@@ -33,10 +34,14 @@ def main():
     if not os.path.exists(model_path):
         print('Please specify a valid dataset and a valid model.')
     model_path = '%s.%s' % (args.dataset, args.model)
-    
+
     print('############################## %s ##############################' % model_path)
-    mod = importlib.import_module(model_path)
-    ClientModel = getattr(mod, 'ClientModel')
+    # todo tdye
+    model_info = {
+        'model_path': model_path
+    }
+    # mod = importlib.import_module(model_path)
+    # ClientModel = getattr(mod, 'ClientModel')
 
     tup = MAIN_PARAMS[args.dataset][args.t]
     num_rounds = args.num_rounds if args.num_rounds != -1 else tup[0]
@@ -47,21 +52,30 @@ def main():
     tf.logging.set_verbosity(tf.logging.WARN)
 
     # Create 2 models
+    # model_params = (0.0003, 62)
+    # 默认学习率
     model_params = MODEL_PARAMS[model_path]
+    # 重置学习率
+    # 重置后的模型参数
     if args.lr != -1:
         model_params_list = list(model_params)
         model_params_list[0] = args.lr
         model_params = tuple(model_params_list)
 
     # Create client model, and share params with server model
+    # 重置全局默认图
     tf.reset_default_graph()
-    client_model = ClientModel(args.seed, *model_params)
-
+    # model_params (0.06, 62)
+    # client_model = ClientModel(args.seed, *model_params)
+    model_info.update({
+        'seed': args.seed,
+        'model_params': model_params
+    })
     # Create server
-    server = Server(client_model)
+    server = Server(model_info)
 
     # Create clients
-    clients = setup_clients(args.dataset, client_model, args.use_val_set)
+    clients = setup_clients(args.dataset, model_info, args.use_val_set)
     client_ids, client_groups, client_num_samples = server.get_clients_info(clients)
     print('Clients in Total: %d' % len(clients))
 
@@ -80,16 +94,17 @@ def main():
         c_ids, c_groups, c_num_samples = server.get_clients_info(server.selected_clients)
 
         # Simulate server model training on selected clients' data
-        sys_metrics = server.train_model(num_epochs=args.num_epochs, batch_size=args.batch_size, minibatch=args.minibatch)
+        sys_metrics = server.train_model(num_epochs=args.num_epochs, batch_size=args.batch_size,
+                                         minibatch=args.minibatch)
         sys_writer_fn(i + 1, c_ids, sys_metrics, c_groups, c_num_samples)
-        
+
         # Update server model
         server.update_model()
 
         # Test model
         if (i + 1) % eval_every == 0 or (i + 1) == num_rounds:
             print_stats(i + 1, server, clients, client_num_samples, args, stat_writer_fn, args.use_val_set)
-    
+
     # Save server model
     ckpt_path = os.path.join('checkpoints', args.dataset)
     if not os.path.exists(ckpt_path):
@@ -100,19 +115,24 @@ def main():
     # Close models
     server.close_model()
 
+
 def online(clients):
     """We assume all users are always online."""
     return clients
 
 
-def create_clients(users, groups, train_data, test_data, model):
+def create_clients(users, groups, train_data, test_data, model_info):
     if len(groups) == 0:
         groups = [[] for _ in users]
-    clients = [Client(u, g, train_data[u], test_data[u], model) for u, g in zip(users, groups)]
+    clients = [Client(u, g, train_data[u], test_data[u], model_info) for u, g in zip(users, groups)]
+    # clients = []
+    # for u, g in zip(users, groups):
+    #     model = copy.deepcopy(model)
+    #     clients.append(Client(u, g, train_data[u], test_data[u], model))
     return clients
 
 
-def setup_clients(dataset, model=None, use_val_set=False):
+def setup_clients(dataset, model_info=None, use_val_set=False):
     """Instantiates clients based on given train and test data directories.
 
     Return:
@@ -124,32 +144,31 @@ def setup_clients(dataset, model=None, use_val_set=False):
 
     users, groups, train_data, test_data = read_data(train_data_dir, test_data_dir)
 
-    clients = create_clients(users, groups, train_data, test_data, model)
+    clients = create_clients(users, groups, train_data, test_data, model_info)
 
     return clients
 
 
 def get_stat_writer_function(ids, groups, num_samples, args):
-
     def writer_fn(num_round, metrics, partition):
         metrics_writer.print_metrics(
-            num_round, ids, metrics, groups, num_samples, partition, args.metrics_dir, '{}_{}'.format(args.metrics_name, 'stat'))
+            num_round, ids, metrics, groups, num_samples, partition, args.metrics_dir,
+            '{}_{}'.format(args.metrics_name, 'stat-fedsp'))
 
     return writer_fn
 
 
 def get_sys_writer_function(args):
-
     def writer_fn(num_round, ids, metrics, groups, num_samples):
         metrics_writer.print_metrics(
-            num_round, ids, metrics, groups, num_samples, 'train', args.metrics_dir, '{}_{}'.format(args.metrics_name, 'sys'))
+            num_round, ids, metrics, groups, num_samples, 'train', args.metrics_dir,
+            '{}_{}'.format(args.metrics_name, 'sys-fedsp'))
 
     return writer_fn
 
 
 def print_stats(
-    num_round, server, clients, num_samples, args, writer, use_val_set):
-    
+        num_round, server, clients, num_samples, args, writer, use_val_set):
     train_stat_metrics = server.test_model(clients, set_to_use='train')
     print_metrics(train_stat_metrics, num_samples, prefix='train_')
     writer(num_round, train_stat_metrics, 'train')

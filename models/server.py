@@ -1,10 +1,19 @@
 import numpy as np
+import importlib
 
 from baseline_constants import BYTES_WRITTEN_KEY, BYTES_READ_KEY, LOCAL_COMPUTATIONS_KEY
 
+
 class Server:
-    
-    def __init__(self, client_model):
+
+    def __init__(self, model_info):
+        model_path = model_info['model_path']
+        seed = model_info['seed']
+        model_params = model_info['model_params']
+        mod = importlib.import_module(model_path)
+        ClientModel = getattr(mod, 'ClientModel')
+        client_model = ClientModel(seed, *model_params)
+
         self.client_model = client_model
         self.model = client_model.get_params()
         self.selected_clients = []
@@ -17,12 +26,14 @@ class Server:
             min(num_clients, len(possible_clients)).
 
         Args:
+            my_round: 当前轮数
             possible_clients: Clients from which the server can select.
             num_clients: Number of clients to select; default 20
         Return:
             list of (num_train_samples, num_test_samples)
         """
         num_clients = min(num_clients, len(possible_clients))
+        # 为了复现实验，每轮对clients采样的随机数采用轮数
         np.random.seed(my_round)
         self.selected_clients = np.random.choice(possible_clients, num_clients, replace=False)
 
@@ -56,7 +67,13 @@ class Server:
                    BYTES_READ_KEY: 0,
                    LOCAL_COMPUTATIONS_KEY: 0} for c in clients}
         for c in clients:
-            c.model.set_params(self.model)
+            # 下发global model的参数
+            # 新加一个函数 c.model.set_global_feature_params
+
+            #  FedAvg
+            # c.model.set_params(self.model)
+            # FedSP
+            c.model.set_global_params(self.model)
             comp, num_samples, update = c.train(num_epochs, batch_size, minibatch)
 
             sys_metrics[c.id][BYTES_READ_KEY] += c.model.size
@@ -68,6 +85,7 @@ class Server:
         return sys_metrics
 
     def update_model(self):
+        # 联邦平均
         total_weight = 0.
         base = [0] * len(self.updates[0][1])
         for (client_samples, client_model) in self.updates:
@@ -97,7 +115,7 @@ class Server:
             client.model.set_params(self.model)
             c_metrics = client.test(set_to_use)
             metrics[client.id] = c_metrics
-        
+
         return metrics
 
     def get_clients_info(self, clients):
@@ -120,7 +138,7 @@ class Server:
         """Saves the server model on checkpoints/dataset/model.ckpt."""
         # Save server model
         self.client_model.set_params(self.model)
-        model_sess =  self.client_model.sess
+        model_sess = self.client_model.sess
         return self.client_model.saver.save(model_sess, path)
 
     def close_model(self):
