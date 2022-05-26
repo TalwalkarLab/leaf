@@ -1,6 +1,6 @@
 numpy==1.16.4
 scipy
-tensorflow==1.13.1
+tensorflow==2.7.2
 Pillow
 matplotlib
 jupyter
