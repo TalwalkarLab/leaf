@@ -40,7 +40,7 @@ class Client:
         num_train_samples = len(data['y'])
         return comp, num_train_samples, update
 
-    def test(self, set_to_use='test'):
+    def test(self, set_to_use='test', batch_size=10):
         """Tests self.model on self.test_data.
         
         Args:

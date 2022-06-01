@@ -5,14 +5,15 @@ import numpy as np
 import os
 import sys
 import random
-import tensorflow as tf
+# import tensorflow as tf
+import torch
+import torchvision
 
 import metrics.writer as metrics_writer
 
 from baseline_constants import MAIN_PARAMS, MODEL_PARAMS
 from client import Client
 from server import Server
-from model import ServerModel
 
 from utils.args import parse_args
 from utils.model_utils import read_data
@@ -25,9 +26,10 @@ def main():
     args = parse_args()
 
     # Set the random seed if provided (affects client sampling, and batching)
-    random.seed(1 + args.seed)
-    np.random.seed(12 + args.seed)
-    tf.set_random_seed(123 + args.seed)
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    # tf.set_random_seed(123 + args.seed)
+    torch.manual_seed(args.seed)
 
     model_path = '%s/%s.py' % (args.dataset, args.model)
     if not os.path.exists(model_path):
@@ -44,7 +46,7 @@ def main():
     clients_per_round = args.clients_per_round if args.clients_per_round != -1 else tup[2]
 
     # Suppress tf warnings
-    tf.logging.set_verbosity(tf.logging.WARN)
+    # tf.logging.set_verbosity(tf.logging.WARN)
 
     # Create 2 models
     model_params = MODEL_PARAMS[model_path]
@@ -54,7 +56,7 @@ def main():
         model_params = tuple(model_params_list)
 
     # Create client model, and share params with server model
-    tf.reset_default_graph()
+    # tf.reset_default_graph()
     client_model = ClientModel(args.seed, *model_params)
 
     # Create server

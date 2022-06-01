@@ -1,6 +1,7 @@
-numpy==1.16.4
+numpy
 scipy
-tensorflow==1.13.1
+torch
+torchvision
 Pillow
 matplotlib
 jupyter
