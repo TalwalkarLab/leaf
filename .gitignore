@@ -3,6 +3,7 @@
 .idea
 build/
 data/*/data
+data/*/meta
 models/__pycache__/
 models/*/__pycache__/
 models/*/preprocess/__pycache__/
