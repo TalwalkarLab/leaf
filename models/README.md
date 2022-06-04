@@ -22,11 +22,11 @@
 - For optimal model performance, generate data using arguments similar to those listed in the 'large-sized dataset' option in the respective dataset README file.
 - ```main.py``` supports these additional tags:
     - ```--model```: name of model; options are listed the respective dataset folder, for example ```cnn``` for femnist; defaults to first model in the respective dataset folder
-    - ```--num-rounds```: number of rounds to simulate
-    - ```--eval-every```: evaluate every ___ rounds
-    - ```--clients-per-round```: number of clients trained per round
-    - ```--batch-size```: batch size when clients train on data
-    - ```--num-epochs```: number of epochs when clients train on data
+    - ```--num_rounds```: number of rounds to simulate
+    - ```--eval_every```: evaluate every ___ rounds
+    - ```--clients_per_round```: number of clients trained per round
+    - ```--batch_size```: batch size when clients train on data
+    - ```--num_epochs```: number of epochs when clients train on data
     - ```-t```: simulation time: small, medium, or large; greater time corresponds to higher accuracy; for large runs, generate data using arguments similar to those listed in the 'large-sized dataset' option in the respective dataset README file for optimal model performance; default: large
     - ```-lr```: learning rate for local optimizers. 
 - After running a classifier, open ```metrics.ipynb``` to view systems and statistical metrics from the last run.
