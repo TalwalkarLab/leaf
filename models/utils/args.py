@@ -16,19 +16,19 @@ def parse_args():
                     help='name of model;',
                     type=str,
                     required=True)
-    parser.add_argument('--num-rounds',
+    parser.add_argument('--num_rounds',
                     help='number of rounds to simulate;',
                     type=int,
                     default=-1)
-    parser.add_argument('--eval-every',
+    parser.add_argument('--eval_every',
                     help='evaluate every ____ rounds;',
                     type=int,
                     default=-1)
-    parser.add_argument('--clients-per-round',
+    parser.add_argument('--clients_per_round',
                     help='number of clients trained per round;',
                     type=int,
                     default=-1)
-    parser.add_argument('--batch-size',
+    parser.add_argument('--batch_size',
                     help='batch size when clients train on data;',
                     type=int,
                     default=10)
@@ -36,31 +36,23 @@ def parse_args():
                     help='seed for random client sampling and batch splitting',
                     type=int,
                     default=0)
-    parser.add_argument('--metrics-name', 
+    parser.add_argument('--metrics_name', 
                     help='name for metrics file;',
                     type=str,
                     default='metrics',
                     required=False)
-    parser.add_argument('--metrics-dir', 
+    parser.add_argument('--metrics_dir', 
                     help='dir for metrics file;',
                     type=str,
                     default='metrics',
                     required=False)
-    parser.add_argument('--use-val-set', 
+    parser.add_argument('--use_val_set', 
                     help='use validation set;', 
                     action='store_true')
-
-    # Minibatch doesn't support num_epochs, so make them mutually exclusive
-    epoch_capability_group = parser.add_mutually_exclusive_group()
-    epoch_capability_group.add_argument('--minibatch',
-                    help='None for FedAvg, else fraction;',
-                    type=float,
-                    default=None)
-    epoch_capability_group.add_argument('--num-epochs',
+    parser.add_argument('--num_epochs',
                     help='number of epochs when clients train on data;',
                     type=int,
                     default=1)
-
     parser.add_argument('-t',
                     help='simulation time: small, medium, or large;',
                     type=str,
