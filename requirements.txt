@@ -1,8 +1,9 @@
+jupyter
+matplotlib
 numpy
+pandas
+Pillow
 scipy
 torch
 torchvision
-Pillow
-matplotlib
-jupyter
-pandas
+tqdm
