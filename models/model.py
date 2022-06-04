@@ -57,7 +57,6 @@ class Model(nn.Module):
         """
         train_dataloader = DataLoader(data, batch_size=batch_size, shuffle=False)
 
-        self.train()
         for _ in range(num_epochs):
             self.run_epoch(train_dataloader)
 
@@ -97,8 +96,10 @@ class Model(nn.Module):
             for X, y in test_dataloader:
                 X = self.process_x(X)
                 y = self.process_y(y)
+
                 # X, y = X.to(device), y.to(device)
                 pred = self.forward(X)
+
                 test_loss += self.loss_fn(pred, y).item()
                 correct += (pred.argmax(dim=1) == y).type(torch.float).sum().item()
 

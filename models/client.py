@@ -1,46 +1,44 @@
-import random
 import warnings
 
+from model import (
+    Model
+)
+
+from torch import (
+    Tensor
+)
+from torch.utils.data import (
+    TensorDataset
+)
 
 class Client:
     
-    def __init__(self, client_id, group=None, train_data={'x' : [],'y' : []}, eval_data={'x' : [],'y' : []}, model=None):
+    def __init__(self, client_id: str, train_data: dict, eval_data: dict, group: list = None, model=None) -> None:
         self._model = model
+
         self.id = client_id
         self.group = group
-        self.train_data = train_data
-        self.eval_data = eval_data
 
-    def train(self, num_epochs=1, batch_size=10, minibatch=None):
+        self.train_data = TensorDataset( Tensor(train_data["x"]), Tensor(train_data["y"]) )
+        self.eval_data =  TensorDataset( Tensor(eval_data["x"]), Tensor(eval_data["y"]) )
+
+    def train(self, num_epochs: int = 1, batch_size: int = 10) -> tuple:
         """Trains on self.model using the client's train_data.
 
         Args:
             num_epochs: Number of epochs to train. Unsupported if minibatch is provided (minibatch has only 1 epoch)
             batch_size: Size of training batches.
-            minibatch: fraction of client's data to apply minibatch sgd,
-                None to use FedAvg
         Return:
             comp: number of FLOPs executed in training process
             num_samples: number of samples used in training
             update: set of weights
-            update_size: number of bytes in update
         """
-        if minibatch is None:
-            data = self.train_data
-            comp, update = self.model.train(data, num_epochs, batch_size)
-        else:
-            frac = min(1.0, minibatch)
-            num_data = max(1, int(frac*len(self.train_data["x"])))
-            xs, ys = zip(*random.sample(list(zip(self.train_data["x"], self.train_data["y"])), num_data))
-            data = {'x': xs, 'y': ys}
+        update = self.model.train_model(self.train_data, num_epochs, batch_size)
+        num_train_samples = len(self.train_data)
 
-            # Minibatch trains for only 1 epoch - multiple local epochs don't make sense!
-            num_epochs = 1
-            comp, update = self.model.train(data, num_epochs, num_data)
-        num_train_samples = len(data['y'])
-        return comp, num_train_samples, update
+        return num_train_samples, update
 
-    def test(self, set_to_use='test', batch_size=10):
+    def test(self, set_to_use: str ='test', batch_size: int = 10) -> dict:
         """Tests self.model on self.test_data.
         
         Args:
@@ -49,14 +47,16 @@ class Client:
             dict of metrics returned by the model.
         """
         assert set_to_use in ['train', 'test', 'val']
+
         if set_to_use == 'train':
             data = self.train_data
         elif set_to_use == 'test' or set_to_use == 'val':
             data = self.eval_data
-        return self.model.test(data)
+
+        return self.model.test(data, batch_size=batch_size)
 
     @property
-    def num_test_samples(self):
+    def num_test_samples(self) -> int:
         """Number of test samples for this client.
 
         Return:
@@ -64,10 +64,10 @@ class Client:
         """
         if self.eval_data is None:
             return 0
-        return len(self.eval_data['y'])
+        return len(self.eval_data)
 
     @property
-    def num_train_samples(self):
+    def num_train_samples(self) -> int:
         """Number of train samples for this client.
 
         Return:
@@ -75,10 +75,10 @@ class Client:
         """
         if self.train_data is None:
             return 0
-        return len(self.train_data['y'])
+        return len(self.train_data)
 
     @property
-    def num_samples(self):
+    def num_samples(self) -> int:
         """Number samples for this client.
 
         Return:
@@ -86,20 +86,20 @@ class Client:
         """
         train_size = 0
         if self.train_data is not None:
-            train_size = len(self.train_data['y'])
+            train_size = len(self.train_data)
 
         test_size = 0 
-        if self.eval_data is not  None:
-            test_size = len(self.eval_data['y'])
+        if self.eval_data is not None:
+            test_size = len(self.eval_data)
         return train_size + test_size
 
     @property
-    def model(self):
+    def model(self) -> Model:
         """Returns this client reference to model being trained"""
         return self._model
 
     @model.setter
-    def model(self, model):
+    def model(self, model: Model) -> None:
         warnings.warn('The current implementation shares the model among all clients.'
                       'Setting it on one client will effectively modify all clients.')
         self._model = model

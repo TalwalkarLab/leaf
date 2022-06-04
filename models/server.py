@@ -1,16 +1,20 @@
 import numpy as np
+from tqdm import tqdm
 
-from baseline_constants import BYTES_WRITTEN_KEY, BYTES_READ_KEY, LOCAL_COMPUTATIONS_KEY
+import torch
+
+from collections import (
+    OrderedDict
+)
 
 class Server:
     
-    def __init__(self, client_model):
-        self.client_model = client_model
-        self.model = client_model.get_params()
+    def __init__(self, model_params: OrderedDict) -> None:
+        self.model_params = model_params
         self.selected_clients = []
         self.updates = []
 
-    def select_clients(self, my_round, possible_clients, num_clients=20):
+    def select_clients(self, my_round: int, possible_clients: list, num_clients: int = 20) -> list:
         """Selects num_clients clients randomly from possible_clients.
         
         Note that within function, num_clients is set to
@@ -26,10 +30,10 @@ class Server:
         np.random.seed(my_round)
         self.selected_clients = np.random.choice(possible_clients, num_clients, replace=False)
 
-        return [(c.num_train_samples, c.num_test_samples) for c in self.selected_clients]
+        return [(c.num_train_samples, c.num_test_samples) for c in self.selected_clients]   
 
-    def train_model(self, num_epochs=1, batch_size=10, minibatch=None, clients=None):
-        """Trains self.model on given clients.
+    def train_model(self, num_epochs: int = 1, batch_size: int = 10, clients=None) -> None:
+        """Trains self.model_params on given clients.
         
         Trains model on self.selected_clients if clients=None;
         each client's data is trained with the given number of epochs
@@ -39,8 +43,6 @@ class Server:
             clients: list of Client objects.
             num_epochs: Number of epochs to train.
             batch_size: Size of training batches.
-            minibatch: fraction of client's data to apply minibatch sgd,
-                None to use FedAvg
         Return:
             bytes_written: number of bytes written by each client to server 
                 dictionary with client ids as keys and integer values.
@@ -51,36 +53,33 @@ class Server:
         """
         if clients is None:
             clients = self.selected_clients
-        sys_metrics = {
-            c.id: {BYTES_WRITTEN_KEY: 0,
-                   BYTES_READ_KEY: 0,
-                   LOCAL_COMPUTATIONS_KEY: 0} for c in clients}
-        for c in clients:
-            c.model.set_params(self.model)
-            comp, num_samples, update = c.train(num_epochs, batch_size, minibatch)
-
-            sys_metrics[c.id][BYTES_READ_KEY] += c.model.size
-            sys_metrics[c.id][BYTES_WRITTEN_KEY] += c.model.size
-            sys_metrics[c.id][LOCAL_COMPUTATIONS_KEY] = comp
+        
+        for c in tqdm(clients, desc="Training clients", leave=False):
+            c.model.set_params(self.model_params)
+            num_samples, update = c.train(num_epochs, batch_size)
 
             self.updates.append((num_samples, update))
 
-        return sys_metrics
+    def update_model(self) -> None:
+        total_weight = 0
+        new_model = OrderedDict()
+        for parameter_name in self.model_params.keys():
+            new_model[parameter_name] = 0
 
-    def update_model(self):
-        total_weight = 0.
-        base = [0] * len(self.updates[0][1])
         for (client_samples, client_model) in self.updates:
             total_weight += client_samples
-            for i, v in enumerate(client_model):
-                base[i] += (client_samples * v.astype(np.float64))
-        averaged_soln = [v / total_weight for v in base]
 
-        self.model = averaged_soln
+            for parameter_name in client_model.keys():
+                new_model[parameter_name] += client_samples * client_model[parameter_name]
+
+        for parameter_name in new_model.keys():
+            new_model[parameter_name] /= total_weight
+
+        self.model_params = new_model
         self.updates = []
 
-    def test_model(self, clients_to_test, set_to_use='test'):
-        """Tests self.model on given clients.
+    def test_model(self, clients_to_test: list, set_to_use: str = 'test') -> dict:
+        """Tests self.model_params on given clients.
 
         Tests model on self.selected_clients if clients_to_test=None.
 
@@ -93,14 +92,14 @@ class Server:
         if clients_to_test is None:
             clients_to_test = self.selected_clients
 
-        for client in clients_to_test:
-            client.model.set_params(self.model)
+        for client in tqdm(clients_to_test, desc=f"Evaluating on {set_to_use} set", leave=False):
+            client.model.set_params(self.model_params)
             c_metrics = client.test(set_to_use)
             metrics[client.id] = c_metrics
         
         return metrics
 
-    def get_clients_info(self, clients):
+    def get_clients_info(self, clients: list = None) -> tuple:
         """Returns the ids, hierarchies and num_samples for the given clients.
 
         Returns info about self.selected_clients if clients=None;
@@ -114,14 +113,10 @@ class Server:
         ids = [c.id for c in clients]
         groups = {c.id: c.group for c in clients}
         num_samples = {c.id: c.num_samples for c in clients}
+
         return ids, groups, num_samples
 
-    def save_model(self, path):
+    def save_model(self, path: str) -> None:
         """Saves the server model on checkpoints/dataset/model.ckpt."""
         # Save server model
-        self.client_model.set_params(self.model)
-        model_sess =  self.client_model.sess
-        return self.client_model.saver.save(model_sess, path)
-
-    def close_model(self):
-        self.client_model.close()
+        torch.save({"model_params": self.model_params}, path)
