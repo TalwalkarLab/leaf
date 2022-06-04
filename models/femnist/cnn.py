@@ -1,7 +1,8 @@
-import tensorflow as tf
+from torch import (
+    nn
+)
 
 from model import Model
-import numpy as np
 
 
 IMAGE_SIZE = 28
@@ -9,46 +10,39 @@ IMAGE_SIZE = 28
 
 class ClientModel(Model):
     def __init__(self, seed, lr, num_classes):
-        self.num_classes = num_classes
         super(ClientModel, self).__init__(seed, lr)
 
-    def create_model(self):
-        """Model function for CNN."""
-        features = tf.placeholder(
-            tf.float32, shape=[None, IMAGE_SIZE * IMAGE_SIZE], name='features')
-        labels = tf.placeholder(tf.int64, shape=[None], name='labels')
-        input_layer = tf.reshape(features, [-1, IMAGE_SIZE, IMAGE_SIZE, 1])
-        conv1 = tf.layers.conv2d(
-          inputs=input_layer,
-          filters=32,
-          kernel_size=[5, 5],
-          padding="same",
-          activation=tf.nn.relu)
-        pool1 = tf.layers.max_pooling2d(inputs=conv1, pool_size=[2, 2], strides=2)
-        conv2 = tf.layers.conv2d(
-            inputs=pool1,
-            filters=64,
-            kernel_size=[5, 5],
-            padding="same",
-            activation=tf.nn.relu)
-        pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
-        pool2_flat = tf.reshape(pool2, [-1, 7 * 7 * 64])
-        dense = tf.layers.dense(inputs=pool2_flat, units=2048, activation=tf.nn.relu)
-        logits = tf.layers.dense(inputs=dense, units=self.num_classes)
-        predictions = {
-          "classes": tf.argmax(input=logits, axis=1),
-          "probabilities": tf.nn.softmax(logits, name="softmax_tensor")
-        }
-        loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
-        # TODO: Confirm that opt initialized once is ok?
-        train_op = self.optimizer.minimize(
-            loss=loss,
-            global_step=tf.train.get_global_step())
-        eval_metric_ops = tf.count_nonzero(tf.equal(labels, predictions["classes"]))
-        return features, labels, train_op, eval_metric_ops, loss
+        self.num_classes = num_classes
+        
+        conv1 = nn.Conv2d(in_channels=1, out_channels=32, kernel_size=(5, 5), padding="same")
+        pool1 = nn.MaxPool2d(kernel_size=(2,2), stride=2)
+        conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same")
+        pool2 = nn.MaxPool2d(kernel_size=(2,2), stride=2)
+        fc1 = nn.Linear(7 * 7 * 64, 2048)
+        fc2 = nn.Linear(2048, self.num_classes)
+
+        self.lenet = nn.Sequential(
+            conv1,
+            nn.ReLU(),
+            pool1,
+            conv2,
+            nn.ReLU(),
+            pool2,
+            nn.Flatten(),
+            fc1,
+            nn.ReLU(),
+            fc2
+        )
+
+        self.loss_fn = nn.CrossEntropyLoss()
+        self.optimizer = self.optimizer(self.parameters(), lr=self.lr)
+
+    def forward(self, x):
+        logits = self.lenet(x)
+        return logits
 
     def process_x(self, raw_x_batch):
-        return np.array(raw_x_batch)
+        return raw_x_batch.reshape(-1, 1, IMAGE_SIZE, IMAGE_SIZE)
 
     def process_y(self, raw_y_batch):
-        return np.array(raw_y_batch)
+        return raw_y_batch.long()
