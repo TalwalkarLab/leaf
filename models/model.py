@@ -1,6 +1,7 @@
 """Interfaces for ClientModel and ServerModel."""
 
 from collections import OrderedDict
+from os import device_encoding
 
 import torch
 from torch import (
@@ -23,19 +24,13 @@ class Model(nn.Module):
         self.seed = seed
         self.optimizer = optimizer
 
-    def set_params(self, param_state_dict: OrderedDict) -> None:
-        self.load_state_dict(param_state_dict)
-
-    def get_params(self) -> OrderedDict:
-        return self.state_dict()
-
     def create_model(self):
         """Creates the model for the task.
 
         Returns:
             A 4-tuple consisting of:
-                features: A placeholder for the samples' features.
-                labels: A placeholder for the samples' labels.
+                features: A placeholder for the samples" features.
+                labels: A placeholder for the samples" labels.
                 train_op: A Tensorflow operation that, when run with the features and
                     the labels, trains the model.
                 eval_metric_ops: A Tensorflow operation that, when run with features and labels,
@@ -43,12 +38,12 @@ class Model(nn.Module):
         """
         return None, None, None, None, None
 
-    def train_model(self, data: Dataset, num_epochs: int = 1, batch_size: int = 10) -> OrderedDict:
+    def train_model(self, data: Dataset, num_epochs: int = 1, batch_size: int = 10, device: str = "cpu") -> OrderedDict:
         """
         Trains the client model.
 
         Args:
-            data: Dict of the form {'x': [list], 'y': [list]}.
+            data: Dict of the form {"x": [list], "y": [list]}.
             num_epochs: Number of epochs to train.
             batch_size: Size of training batches.
         Return:
@@ -57,18 +52,19 @@ class Model(nn.Module):
         """
         train_dataloader = DataLoader(data, batch_size=batch_size, shuffle=False)
 
+        self.train()
         for _ in range(num_epochs):
-            self.run_epoch(train_dataloader)
+            self.run_epoch(train_dataloader, device)
 
-        update = self.get_params()
+        update = self.state_dict()
         return update
 
-    def run_epoch(self, dataloader: DataLoader) -> None:
+    def run_epoch(self, dataloader: DataLoader, device: str = "cpu") -> None:
 
         for X, y in dataloader:
             
-            X = self.process_x(X)
-            y = self.process_y(y)
+            X = self.process_x(X).to(device)
+            y = self.process_y(y).to(device)
 
             pred = self.forward(X)
             loss = self.loss_fn(pred, y)
@@ -77,12 +73,13 @@ class Model(nn.Module):
             loss.backward()
             self.optimizer.step()
 
-    def test(self, data: Dataset, batch_size: int = 10) -> dict:
+    @torch.no_grad()
+    def test(self, data: Dataset, batch_size: int = 10, device: str = "cpu") -> dict:
         """
         Tests the current model on the given data.
 
         Args:
-            data: dict of the form {'x': [list], 'y': [list]}
+            data: dict of the form {"x": [list], "y": [list]}
         Return:
             dict of metrics that will be recorded by the simulation.
         """
@@ -92,21 +89,19 @@ class Model(nn.Module):
         self.eval()
         test_loss, correct = 0, 0
 
-        with torch.no_grad():
-            for X, y in test_dataloader:
-                X = self.process_x(X)
-                y = self.process_y(y)
+        for X, y in test_dataloader:
+            X = self.process_x(X).to(device)
+            y = self.process_y(y).to(device)
 
-                # X, y = X.to(device), y.to(device)
-                pred = self.forward(X)
+            pred = self.forward(X)
 
-                test_loss += self.loss_fn(pred, y).item()
-                correct += (pred.argmax(dim=1) == y).type(torch.float).sum().item()
+            test_loss += self.loss_fn(pred, y).item()
+            correct += (pred.argmax(dim=1) == y).type(torch.float).sum().item()
 
         test_loss /= num_batches
         correct /= size
 
-        return {ACCURACY_KEY: correct, 'loss': test_loss}
+        return {ACCURACY_KEY: correct, "loss": test_loss}
 
     def process_x(self, raw_x_batch):
         """Pre-processes each batch of features before being fed to the model."""

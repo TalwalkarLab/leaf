@@ -13,8 +13,9 @@ from torch.utils.data import (
 
 class Client:
     
-    def __init__(self, client_id: str, train_data: dict, eval_data: dict, group: list = None, model=None) -> None:
-        self._model = model
+    def __init__(self, client_id: str, train_data: dict, eval_data: dict, model: type, model_settings: tuple, group: list = None, device: str = "cpu") -> None:
+        self._model = model(*model_settings).to(device)
+        self.device = device
 
         self.id = client_id
         self.group = group
@@ -23,7 +24,7 @@ class Client:
         self.eval_data =  TensorDataset( Tensor(eval_data["x"]), Tensor(eval_data["y"]) )
 
     def train(self, num_epochs: int = 1, batch_size: int = 10) -> tuple:
-        """Trains on self.model using the client's train_data.
+        """Trains on self.model using the client"s train_data.
 
         Args:
             num_epochs: Number of epochs to train. Unsupported if minibatch is provided (minibatch has only 1 epoch)
@@ -33,27 +34,27 @@ class Client:
             num_samples: number of samples used in training
             update: set of weights
         """
-        update = self.model.train_model(self.train_data, num_epochs, batch_size)
+        update = self.model.train_model(self.train_data, num_epochs, batch_size, self.device)
         num_train_samples = len(self.train_data)
 
         return num_train_samples, update
 
-    def test(self, set_to_use: str ='test', batch_size: int = 10) -> dict:
+    def test(self, set_to_use: str ="test", batch_size: int = 10) -> dict:
         """Tests self.model on self.test_data.
         
         Args:
-            set_to_use. Set to test on. Should be in ['train', 'test'].
+            set_to_use. Set to test on. Should be in ["train", "test"].
         Return:
             dict of metrics returned by the model.
         """
-        assert set_to_use in ['train', 'test', 'val']
+        assert set_to_use in ["train", "test", "val"]
 
-        if set_to_use == 'train':
+        if set_to_use == "train":
             data = self.train_data
-        elif set_to_use == 'test' or set_to_use == 'val':
+        elif set_to_use == "test" or set_to_use == "val":
             data = self.eval_data
 
-        return self.model.test(data, batch_size=batch_size)
+        return self.model.test(data, batch_size, self.device)
 
     @property
     def num_test_samples(self) -> int:
@@ -100,6 +101,6 @@ class Client:
 
     @model.setter
     def model(self, model: Model) -> None:
-        warnings.warn('The current implementation shares the model among all clients.'
-                      'Setting it on one client will effectively modify all clients.')
+        warnings.warn("The current implementation shares the model among all clients."
+                      "Setting it on one client will effectively modify all clients.")
         self._model = model

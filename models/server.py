@@ -7,6 +7,12 @@ from collections import (
     OrderedDict
 )
 
+"""
+   TODO: Clients are able to learn but server isn"t learning for some reason.
+   Try removing the get/set_params wrappers idk
+   or maybe you just came up with something at the gym lmao
+"""
+
 class Server:
     
     def __init__(self, model_params: OrderedDict) -> None:
@@ -36,7 +42,7 @@ class Server:
         """Trains self.model_params on given clients.
         
         Trains model on self.selected_clients if clients=None;
-        each client's data is trained with the given number of epochs
+        each client"s data is trained with the given number of epochs
         and batches.
 
         Args:
@@ -54,38 +60,39 @@ class Server:
         if clients is None:
             clients = self.selected_clients
         
-        for c in tqdm(clients, desc="Training clients", leave=False):
-            c.model.set_params(self.model_params)
-            num_samples, update = c.train(num_epochs, batch_size)
+        for client in tqdm(clients, desc="Training clients", leave=False):
+            client.model.load_state_dict(self.model_params)
+            num_samples, update = client.train(num_epochs, batch_size)
 
             self.updates.append((num_samples, update))
 
+    @torch.no_grad()
     def update_model(self) -> None:
-        total_weight = 0
         new_model = OrderedDict()
-        for parameter_name in self.model_params.keys():
-            new_model[parameter_name] = 0
+        for param_tensor in self.model_params.keys():
+            new_model[param_tensor] = 0
 
+        total_weight = 0
         for (client_samples, client_model) in self.updates:
             total_weight += client_samples
 
-            for parameter_name in client_model.keys():
-                new_model[parameter_name] += client_samples * client_model[parameter_name]
+            for param_tensor, layer in client_model.items():
+                new_model[param_tensor] += client_samples * layer
 
-        for parameter_name in new_model.keys():
-            new_model[parameter_name] /= total_weight
+        for param_tensor in new_model.keys():
+            new_model[param_tensor] /= total_weight
 
         self.model_params = new_model
         self.updates = []
 
-    def test_model(self, clients_to_test: list, set_to_use: str = 'test') -> dict:
+    def test_model(self, clients_to_test: list, set_to_use: str = "test") -> dict:
         """Tests self.model_params on given clients.
 
         Tests model on self.selected_clients if clients_to_test=None.
 
         Args:
             clients_to_test: list of Client objects.
-            set_to_use: dataset to test on. Should be in ['train', 'test'].
+            set_to_use: dataset to test on. Should be in ["train", "test"].
         """
         metrics = {}
 
@@ -93,7 +100,7 @@ class Server:
             clients_to_test = self.selected_clients
 
         for client in tqdm(clients_to_test, desc=f"Evaluating on {set_to_use} set", leave=False):
-            client.model.set_params(self.model_params)
+            client.model.load_state_dict(self.model_params)
             c_metrics = client.test(set_to_use)
             metrics[client.id] = c_metrics
         
