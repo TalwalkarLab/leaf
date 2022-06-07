@@ -2,7 +2,9 @@ from torch import (
     nn
 )
 
-from model import Model
+from model import (
+    Model
+)
 
 
 IMAGE_SIZE = 28
