@@ -19,6 +19,10 @@ def _one_hot(index, size):
     vec[int(index)] = 1
     return vec
 
+def letter_to_index(letter):
+    '''returns index of given letter
+    '''
+    return ALL_LETTERS.find(letter)
 
 def letter_to_vec(letter):
     '''returns one-hot representation of given letter
