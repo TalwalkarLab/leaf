@@ -1,5 +1,9 @@
 from torch import (
-    nn
+    nn,
+    Tensor
+)
+from torch.utils.data import (
+    TensorDataset
 )
 
 from model import (
@@ -38,13 +42,12 @@ class ClientModel(Model):
 
         self.loss_fn = nn.CrossEntropyLoss()
         self.optimizer = self.optimizer(self.parameters(), lr=self.lr)
+    
+    def generate_dataset(self, data: dict) -> TensorDataset:
+        # print("x shape:", Tensor(data["x"]).shape)
+        # print("y shape:", Tensor(data["y"]).shape)
+        return TensorDataset( Tensor(data["x"]).reshape(-1, 1, IMAGE_SIZE, IMAGE_SIZE), Tensor(data["y"]).long() )
 
     def forward(self, x):
         logits = self.lenet(x)
         return logits
-
-    def process_x(self, raw_x_batch):
-        return raw_x_batch.reshape(-1, 1, IMAGE_SIZE, IMAGE_SIZE)
-
-    def process_y(self, raw_y_batch):
-        return raw_y_batch.long()

@@ -1,14 +1,5 @@
-import warnings
-
 from model import (
     Model
-)
-
-from torch import (
-    Tensor
-)
-from torch.utils.data import (
-    TensorDataset
 )
 
 class Client:
@@ -20,8 +11,8 @@ class Client:
         self.id = client_id
         self.group = group
 
-        self.train_data = TensorDataset( Tensor(train_data["x"]), Tensor(train_data["y"]) )
-        self.eval_data =  TensorDataset( Tensor(eval_data["x"]), Tensor(eval_data["y"]) )
+        self.train_data = self.model.generate_dataset(train_data)
+        self.eval_data = self.model.generate_dataset(eval_data)
 
     def train(self, num_epochs: int = 1, batch_size: int = 10) -> tuple:
         """Trains on self.model using the client"s train_data.
@@ -98,9 +89,3 @@ class Client:
     def model(self) -> Model:
         """Returns this client reference to model being trained"""
         return self._model
-
-    @model.setter
-    def model(self, model: Model) -> None:
-        warnings.warn("The current implementation shares the model among all clients."
-                      "Setting it on one client will effectively modify all clients.")
-        self._model = model

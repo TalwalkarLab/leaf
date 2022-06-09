@@ -37,6 +37,12 @@ class Model(nn.Module):
                     returns the accuracy of the model.
         """
         return None, None, None, None, None
+    
+    def generate_dataset(self, data: dict) -> Dataset:
+        """
+        Generate PyTorch Dataset object from data dicts
+        """
+        return None
 
     def train_model(self, data: Dataset, num_epochs: int = 1, batch_size: int = 10, device: str = "cpu") -> OrderedDict:
         """
@@ -62,9 +68,7 @@ class Model(nn.Module):
     def run_epoch(self, dataloader: DataLoader, device: str = "cpu") -> None:
 
         for X, y in dataloader:
-            
-            X = self.process_x(X).to(device)
-            y = self.process_y(y).to(device)
+            X, y = X.to(device), y.to(device)
 
             pred = self.forward(X)
             loss = self.loss_fn(pred, y)
@@ -90,8 +94,7 @@ class Model(nn.Module):
         test_loss, correct = 0, 0
 
         for X, y in test_dataloader:
-            X = self.process_x(X).to(device)
-            y = self.process_y(y).to(device)
+            X, y = X.to(device), y.to(device)
 
             pred = self.forward(X)
 
@@ -102,11 +105,3 @@ class Model(nn.Module):
         correct /= size
 
         return {ACCURACY_KEY: correct, "loss": test_loss}
-
-    def process_x(self, raw_x_batch):
-        """Pre-processes each batch of features before being fed to the model."""
-        pass
-
-    def process_y(self, raw_y_batch):
-        """Pre-processes each batch of labels before being fed to the model."""
-        pass

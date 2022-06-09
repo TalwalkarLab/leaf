@@ -1,5 +1,4 @@
 """Script to run the baselines."""
-import argparse
 import importlib
 import logging
 import os
