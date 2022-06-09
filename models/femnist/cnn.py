@@ -27,7 +27,7 @@ class ClientModel(Model):
         fc1 = nn.Linear(7 * 7 * 64, 2048)
         fc2 = nn.Linear(2048, self.num_classes)
 
-        self.lenet = nn.Sequential(
+        self.cnn = nn.Sequential(
             conv1,
             nn.ReLU(),
             pool1,
@@ -44,10 +44,12 @@ class ClientModel(Model):
         self.optimizer = self.optimizer(self.parameters(), lr=self.lr)
     
     def generate_dataset(self, data: dict) -> TensorDataset:
-        # print("x shape:", Tensor(data["x"]).shape)
-        # print("y shape:", Tensor(data["y"]).shape)
-        return TensorDataset( Tensor(data["x"]).reshape(-1, 1, IMAGE_SIZE, IMAGE_SIZE), Tensor(data["y"]).long() )
+        return TensorDataset(
+            Tensor(data["x"]).reshape(-1, 1, IMAGE_SIZE, IMAGE_SIZE),
+            Tensor(data["y"]).long()
+        )
 
     def forward(self, x):
-        logits = self.lenet(x)
+        logits = self.cnn(x)
+
         return logits

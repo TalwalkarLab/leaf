@@ -1,7 +1,6 @@
 """Interfaces for ClientModel and ServerModel."""
 
 from collections import OrderedDict
-from os import device_encoding
 
 import torch
 from torch import (
