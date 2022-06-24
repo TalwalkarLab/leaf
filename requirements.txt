@@ -1,6 +1,6 @@
 numpy==1.20
 scipy
 tensorflow== 2.8.2
-# Pillowmatplotlib
+Pillowmatplotlib
 jupyter
 pandas
