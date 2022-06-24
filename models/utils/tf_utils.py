@@ -1,5 +1,7 @@
 
-import tensorflow as tf
+# import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 def __num_elems(shape):
     '''Returns the number of elements in the given shape
