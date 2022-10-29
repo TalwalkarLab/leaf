@@ -24,7 +24,7 @@ with open(test_file_name, 'rt', encoding='ISO-8859-1') as f:
 
 out_file_name = os.path.join(parent_path, 'data', 'intermediate', 'all_data.csv')
 
-with open(out_file_name, 'w') as f:
+with open(out_file_name, 'w', encoding='ISO-8859-1', newline='') as f:
     writer = csv.writer(f)
 
     for row in training:
