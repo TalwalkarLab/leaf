@@ -3,7 +3,7 @@
 cd ../data/raw_data
 
 if [ ! -f trainingandtestdata.zip ]; then
-    wget --no-check-certificate http://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip
+    wget --no-check-certificate https://cs.stanford.edu/people/alecmgo/trainingandtestdata.zip
 fi
 
 unzip trainingandtestdata.zip
