@@ -2,7 +2,7 @@
 
 cd ../data/raw_data
 
-wget http://www.gutenberg.org/files/100/old/1994-01-100.zip
+wget http://www.gutenberg.org/files/100/old/old/1994-01-100.zip
 unzip 1994-01-100.zip
 rm 1994-01-100.zip
 mv 100.txt raw_data.txt
