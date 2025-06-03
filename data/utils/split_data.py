@@ -34,34 +34,35 @@ def create_jsons_for(user_files, which_set, max_users, include_hierarchy):
         num_samples.append(ns)
         user_data[u] = data['user_data'][u]
         user_count += 1
-
-    if (user_count == max_users) or (i == len(user_files) - 1):
-
-        all_data = {}
-        all_data['users'] = users
-        all_data['num_samples'] = num_samples
-        all_data['user_data'] = user_data
-
-        data_i = f.find('data')
-        num_i = data_i + 5
-        num_to_end = f[num_i:]
-        param_i = num_to_end.find('_')
-        param_to_end = '.json'
-        if param_i != -1:
-            param_to_end = num_to_end[param_i:]
-        nf = '%s_%d%s' % (f[:(num_i-1)], json_index, param_to_end)
-        file_name = '%s_%s_%s.json' % ((nf[:-5]), which_set, arg_label)
-        ouf_dir = os.path.join(dir, which_set, file_name)
-
-        print('writing %s' % file_name)
-        with open(ouf_dir, 'w') as outfile:
-            json.dump(all_data, outfile)
-
-        user_count = 0
-        json_index += 1
-        users = []
-        num_samples = []
-        user_data = {}
+        
+        # ✅ 正确做法：每处理一个 user 都判断一次
+        if (user_count == max_users) or (i == len(user_files) - 1):
+    
+            all_data = {}
+            all_data['users'] = users
+            all_data['num_samples'] = num_samples
+            all_data['user_data'] = user_data
+    
+            data_i = f.find('data')
+            num_i = data_i + 5
+            num_to_end = f[num_i:]
+            param_i = num_to_end.find('_')
+            param_to_end = '.json'
+            if param_i != -1:
+                param_to_end = num_to_end[param_i:]
+            nf = '%s_%d%s' % (f[:(num_i-1)], json_index, param_to_end)
+            file_name = '%s_%s_%s.json' % ((nf[:-5]), which_set, arg_label)
+            ouf_dir = os.path.join(dir, which_set, file_name)
+    
+            print('writing %s' % file_name)
+            with open(ouf_dir, 'w') as outfile:
+                json.dump(all_data, outfile)
+    
+            user_count = 0
+            json_index += 1
+            users = []
+            num_samples = []
+            user_data = {}
 
 parser = argparse.ArgumentParser()
 
