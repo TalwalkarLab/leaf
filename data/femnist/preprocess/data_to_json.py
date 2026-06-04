@@ -61,7 +61,7 @@ for (w, l) in writers:
         file_path = os.path.join(parent_path, f)
         img = Image.open(file_path)
         gray = img.convert('L')
-        gray.thumbnail(size, Image.ANTIALIAS)
+        gray.thumbnail(size, Image.LANCZOS)
         arr = np.asarray(gray).copy()
         vec = arr.flatten()
         vec = vec / 255  # scale all pixel values to between 0 and 1
